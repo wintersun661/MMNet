@@ -35,6 +35,10 @@ class OptionParser():
         self.parser.add_argument(
             '--checkpoint_path', type=str, default="./checkpoints")
 
+        # visualization path
+        self.parser.add_argument(
+            '--visualization_path', type=str, default='visualization')
+
         # model selection
         self.parser.add_argument(
             '--model_type', type=str, default="MMNet"
