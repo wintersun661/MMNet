@@ -13,6 +13,14 @@ class OptionParser():
         # system description
         self.parser.add_argument('--name', type=str, default=self.name)
 
+        # task specific setting
+        self.parser.add_argument('--benchmark', type=str, default="pfpascal")
+        self.parser.add_argument('--thresh_type', type=str, default="auto")
+        self.parser.add_argument(
+            '--backbone_name', type=str, default="resnet101")
+        self.parser.add_argument('--ms_rate', type=int, default=4)
+        self.parser.add_argument('--feature_channel', type=int, default=21)
+
         # hyper-parameters shared by train & test
         self.parser.add_argument('--batch', type=int, default=10)
 
@@ -20,11 +28,17 @@ class OptionParser():
         self.parser.add_argument('--gpu', type=str, default="0")
 
         # data source
-        self.parser.add_argument('--data_path', type=str, default="./dataset")
+        self.parser.add_argument(
+            '--data_path', type=str, default="/data/Datasets_SCOT/")
 
         # checkpoint path
         self.parser.add_argument(
             '--checkpoint_path', type=str, default="./checkpoints")
+
+        # model selection
+        self.parser.add_argument(
+            '--model_type', type=str, default="MMNet"
+        )
 
     def parse(self):
         if not self.initialized:

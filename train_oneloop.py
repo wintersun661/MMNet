@@ -14,7 +14,7 @@ from data import PascalDataset as Dataset
 #from utils import visualizer
 
 from models import Loss, Optimizer
-from models import Model as Model
+from models import One_Loop as Model
 
 from utils import geometry
 from evaluation_tools import evaluation

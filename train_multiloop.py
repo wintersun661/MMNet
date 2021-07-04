@@ -14,7 +14,7 @@ from data import PascalDataset as Dataset
 #from utils import visualizer
 
 from models import Loss, Optimizer
-from models import Model as Model
+from models import Multi_Loop as Model
 
 from utils import geometry
 from evaluation_tools import evaluation
@@ -60,8 +60,7 @@ def cross_entropy_loss2d(loss_func, inputs, kps_src_list, kps_trg_list, effect_n
     return loss
 
 
-def validation_res(cur_model, epoch_no, opt, logger, target_shape, alpha=0.1):
-    resolution = 2
+def validation_res(cur_model, epoch_no, opt, logger, alpha=0.1, resolution=2):
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     batch_size = opt.batch
     val_dataset = Dataset.CorrespondenceDataset(
@@ -82,7 +81,7 @@ def validation_res(cur_model, epoch_no, opt, logger, target_shape, alpha=0.1):
         for k in range(len(data["src_imname"])):
 
             prd_kps = geometry.predict_kps(
-                data["src_kps"][k][:, :data["valid_kps_num"][k]], pred[resolution][0][k], originalShape=target_shape)
+                data["src_kps"][k][:, :data["valid_kps_num"][k]], pred[opt.resolution][0][k], originalShape=target_shape)
             prd_kps = torch.from_numpy(np.array(prd_kps)).to(device)
 
             pair_pck = evaluation.eval_pck(prd_kps, data, k)
@@ -163,7 +162,7 @@ def train(logger, opt):
         logger.info('saving %dth ckp in %s.' % (epoch, ckp_path))
         torch.save(model.state_dict(), os.path.join(
             ckp_path, str(epoch)+".pth"))
-        res = validation_res(model, epoch, opt, logger, target_shape)
+        res = validation_res(model, epoch, opt, logger)
         if res > max_pck:
             logger.info('saving %dth ckp as best in %s.' % (epoch, ckp_path))
             torch.save(model.state_dict(), os.path.join(

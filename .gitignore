@@ -1,0 +1,5 @@
+logs/*
+checkpoints/*
+ckp_*/*
+visualizations/*
+*.pyc

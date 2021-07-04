@@ -15,3 +15,571 @@
 2021-06-27 10:46:55,687 - INFO - validation_file: validation.csv
 2021-06-27 10:46:55,687 - INFO - test_file: test.csv
 2021-06-27 10:46:55,687 - INFO - Options all listed.------------------
+2021-06-27 16:37:26,946 - INFO - Options listed below:----------------
+2021-06-27 16:37:26,946 - INFO - name: framework_train
+2021-06-27 16:37:26,946 - INFO - benchmark: pfpascal
+2021-06-27 16:37:26,946 - INFO - thresh_type: auto
+2021-06-27 16:37:26,946 - INFO - batch: 10
+2021-06-27 16:37:26,946 - INFO - gpu: 0
+2021-06-27 16:37:26,946 - INFO - data_path: /data/Datasets_SCOT/
+2021-06-27 16:37:26,946 - INFO - checkpoint_path: ./checkpoints
+2021-06-27 16:37:26,946 - INFO - epoch: 20
+2021-06-27 16:37:26,946 - INFO - resize: 224,320
+2021-06-27 16:37:26,946 - INFO - max_kps_num: 50
+2021-06-27 16:37:26,946 - INFO - split_type: trn
+2021-06-27 16:37:26,947 - INFO - optimizer_type: SGD
+2021-06-27 16:37:26,947 - INFO - lr: 0.001
+2021-06-27 16:37:26,947 - INFO - momentum: 0.9
+2021-06-27 16:37:26,947 - INFO - loss_type: MSE
+2021-06-27 16:37:26,947 - INFO - train_file: train.csv
+2021-06-27 16:37:26,947 - INFO - validation_file: validation.csv
+2021-06-27 16:37:26,947 - INFO - test_file: test.csv
+2021-06-27 16:37:26,947 - INFO - Options all listed.------------------
+2021-06-27 16:38:15,400 - INFO - Options listed below:----------------
+2021-06-27 16:38:15,400 - INFO - name: framework_train
+2021-06-27 16:38:15,400 - INFO - benchmark: pfpascal
+2021-06-27 16:38:15,400 - INFO - thresh_type: auto
+2021-06-27 16:38:15,401 - INFO - batch: 10
+2021-06-27 16:38:15,401 - INFO - gpu: 0
+2021-06-27 16:38:15,401 - INFO - data_path: /data/Datasets_SCOT/
+2021-06-27 16:38:15,401 - INFO - checkpoint_path: ./checkpoints
+2021-06-27 16:38:15,401 - INFO - epoch: 20
+2021-06-27 16:38:15,401 - INFO - resize: 224,320
+2021-06-27 16:38:15,401 - INFO - max_kps_num: 50
+2021-06-27 16:38:15,401 - INFO - split_type: trn
+2021-06-27 16:38:15,401 - INFO - optimizer_type: SGD
+2021-06-27 16:38:15,401 - INFO - lr: 0.001
+2021-06-27 16:38:15,401 - INFO - momentum: 0.9
+2021-06-27 16:38:15,401 - INFO - loss_type: MSE
+2021-06-27 16:38:15,401 - INFO - train_file: train.csv
+2021-06-27 16:38:15,401 - INFO - validation_file: validation.csv
+2021-06-27 16:38:15,401 - INFO - test_file: test.csv
+2021-06-27 16:38:15,401 - INFO - Options all listed.------------------
+2021-06-27 16:38:37,666 - INFO - Options listed below:----------------
+2021-06-27 16:38:37,666 - INFO - name: framework_train
+2021-06-27 16:38:37,666 - INFO - benchmark: pfpascal
+2021-06-27 16:38:37,666 - INFO - thresh_type: auto
+2021-06-27 16:38:37,666 - INFO - batch: 10
+2021-06-27 16:38:37,666 - INFO - gpu: 0
+2021-06-27 16:38:37,667 - INFO - data_path: /data/Datasets_SCOT/
+2021-06-27 16:38:37,667 - INFO - checkpoint_path: ./checkpoints
+2021-06-27 16:38:37,667 - INFO - epoch: 20
+2021-06-27 16:38:37,667 - INFO - resize: 224,320
+2021-06-27 16:38:37,667 - INFO - max_kps_num: 50
+2021-06-27 16:38:37,667 - INFO - split_type: trn
+2021-06-27 16:38:37,667 - INFO - optimizer_type: SGD
+2021-06-27 16:38:37,667 - INFO - lr: 0.001
+2021-06-27 16:38:37,667 - INFO - momentum: 0.9
+2021-06-27 16:38:37,667 - INFO - loss_type: MSE
+2021-06-27 16:38:37,667 - INFO - train_file: train.csv
+2021-06-27 16:38:37,667 - INFO - validation_file: validation.csv
+2021-06-27 16:38:37,667 - INFO - test_file: test.csv
+2021-06-27 16:38:37,667 - INFO - Options all listed.------------------
+2021-06-27 16:40:51,598 - INFO - Options listed below:----------------
+2021-06-27 16:40:51,599 - INFO - name: framework_train
+2021-06-27 16:40:51,599 - INFO - benchmark: pfpascal
+2021-06-27 16:40:51,599 - INFO - thresh_type: auto
+2021-06-27 16:40:51,599 - INFO - batch: 10
+2021-06-27 16:40:51,599 - INFO - gpu: 0
+2021-06-27 16:40:51,599 - INFO - data_path: /data/Datasets_SCOT/
+2021-06-27 16:40:51,599 - INFO - checkpoint_path: ./checkpoints
+2021-06-27 16:40:51,599 - INFO - epoch: 20
+2021-06-27 16:40:51,599 - INFO - resize: 224,320
+2021-06-27 16:40:51,599 - INFO - max_kps_num: 50
+2021-06-27 16:40:51,599 - INFO - split_type: trn
+2021-06-27 16:40:51,599 - INFO - optimizer_type: SGD
+2021-06-27 16:40:51,599 - INFO - lr: 0.001
+2021-06-27 16:40:51,599 - INFO - momentum: 0.9
+2021-06-27 16:40:51,599 - INFO - loss_type: MSE
+2021-06-27 16:40:51,599 - INFO - train_file: train.csv
+2021-06-27 16:40:51,599 - INFO - validation_file: validation.csv
+2021-06-27 16:40:51,599 - INFO - test_file: test.csv
+2021-06-27 16:40:51,599 - INFO - Options all listed.------------------
+2021-06-27 16:41:30,619 - INFO - Options listed below:----------------
+2021-06-27 16:41:30,619 - INFO - name: framework_train
+2021-06-27 16:41:30,619 - INFO - benchmark: pfpascal
+2021-06-27 16:41:30,619 - INFO - thresh_type: auto
+2021-06-27 16:41:30,619 - INFO - batch: 10
+2021-06-27 16:41:30,619 - INFO - gpu: 0
+2021-06-27 16:41:30,619 - INFO - data_path: /data/Datasets_SCOT/
+2021-06-27 16:41:30,619 - INFO - checkpoint_path: ./checkpoints
+2021-06-27 16:41:30,619 - INFO - epoch: 20
+2021-06-27 16:41:30,619 - INFO - resize: 224,320
+2021-06-27 16:41:30,619 - INFO - max_kps_num: 50
+2021-06-27 16:41:30,619 - INFO - split_type: trn
+2021-06-27 16:41:30,619 - INFO - optimizer_type: SGD
+2021-06-27 16:41:30,619 - INFO - lr: 0.001
+2021-06-27 16:41:30,619 - INFO - momentum: 0.9
+2021-06-27 16:41:30,619 - INFO - loss_type: MSE
+2021-06-27 16:41:30,620 - INFO - train_file: train.csv
+2021-06-27 16:41:30,620 - INFO - validation_file: validation.csv
+2021-06-27 16:41:30,620 - INFO - test_file: test.csv
+2021-06-27 16:41:30,620 - INFO - Options all listed.------------------
+2021-06-27 16:41:37,196 - INFO - sample consists: src_imname
+2021-06-27 16:41:37,196 - INFO - sample consists: trg_imname
+2021-06-27 16:41:37,196 - INFO - sample consists: pair_classid
+2021-06-27 16:41:37,196 - INFO - sample consists: pair_class
+2021-06-27 16:41:37,197 - INFO - sample consists: src_img
+2021-06-27 16:41:37,197 - INFO - sample consists: trg_img
+2021-06-27 16:41:37,197 - INFO - sample consists: src_kps
+2021-06-27 16:41:37,197 - INFO - sample consists: trg_kps
+2021-06-27 16:41:37,197 - INFO - sample consists: valid_kps_num
+2021-06-27 16:41:37,197 - INFO - sample consists: src_bbox
+2021-06-27 16:41:37,197 - INFO - sample consists: trg_bbox
+2021-06-27 16:41:37,197 - INFO - sample consists: pckthres
+2021-06-27 16:43:50,027 - INFO - Options listed below:----------------
+2021-06-27 16:43:50,027 - INFO - name: framework_train
+2021-06-27 16:43:50,027 - INFO - benchmark: pfpascal
+2021-06-27 16:43:50,027 - INFO - thresh_type: auto
+2021-06-27 16:43:50,028 - INFO - batch: 10
+2021-06-27 16:43:50,028 - INFO - gpu: 0
+2021-06-27 16:43:50,028 - INFO - data_path: /data/Datasets_SCOT/
+2021-06-27 16:43:50,028 - INFO - checkpoint_path: ./checkpoints
+2021-06-27 16:43:50,028 - INFO - epoch: 20
+2021-06-27 16:43:50,028 - INFO - resize: 224,320
+2021-06-27 16:43:50,028 - INFO - max_kps_num: 50
+2021-06-27 16:43:50,028 - INFO - split_type: trn
+2021-06-27 16:43:50,028 - INFO - optimizer_type: SGD
+2021-06-27 16:43:50,028 - INFO - lr: 0.001
+2021-06-27 16:43:50,028 - INFO - momentum: 0.9
+2021-06-27 16:43:50,028 - INFO - loss_type: MSE
+2021-06-27 16:43:50,028 - INFO - train_file: train.csv
+2021-06-27 16:43:50,028 - INFO - validation_file: validation.csv
+2021-06-27 16:43:50,028 - INFO - test_file: test.csv
+2021-06-27 16:43:50,028 - INFO - Options all listed.------------------
+2021-06-27 16:43:57,041 - INFO - torch.Size([10, 3, 320, 224])
+2021-06-27 16:43:57,042 - INFO - torch.Size([10, 2, 50])
+2021-06-27 17:18:55,948 - INFO - Options listed below:----------------
+2021-06-27 17:18:55,948 - INFO - name: framework_train
+2021-06-27 17:18:55,948 - INFO - benchmark: pfpascal
+2021-06-27 17:18:55,948 - INFO - thresh_type: auto
+2021-06-27 17:18:55,948 - INFO - backbone_name: resnet101
+2021-06-27 17:18:55,948 - INFO - ms_rate: 4
+2021-06-27 17:18:55,948 - INFO - feature_channel: 21
+2021-06-27 17:18:55,948 - INFO - batch: 10
+2021-06-27 17:18:55,948 - INFO - gpu: 0
+2021-06-27 17:18:55,948 - INFO - data_path: /data/Datasets_SCOT/
+2021-06-27 17:18:55,948 - INFO - checkpoint_path: ./checkpoints
+2021-06-27 17:18:55,948 - INFO - epoch: 20
+2021-06-27 17:18:55,949 - INFO - resize: 224,320
+2021-06-27 17:18:55,949 - INFO - max_kps_num: 50
+2021-06-27 17:18:55,949 - INFO - split_type: trn
+2021-06-27 17:18:55,949 - INFO - optimizer_type: SGD
+2021-06-27 17:18:55,949 - INFO - lr: 0.001
+2021-06-27 17:18:55,949 - INFO - momentum: 0.9
+2021-06-27 17:18:55,949 - INFO - loss_type: MSE
+2021-06-27 17:18:55,949 - INFO - Options all listed.------------------
+2021-06-27 17:19:11,771 - INFO - Options listed below:----------------
+2021-06-27 17:19:11,771 - INFO - name: framework_train
+2021-06-27 17:19:11,771 - INFO - benchmark: pfpascal
+2021-06-27 17:19:11,771 - INFO - thresh_type: auto
+2021-06-27 17:19:11,771 - INFO - backbone_name: resnet101
+2021-06-27 17:19:11,771 - INFO - ms_rate: 4
+2021-06-27 17:19:11,772 - INFO - feature_channel: 21
+2021-06-27 17:19:11,772 - INFO - batch: 10
+2021-06-27 17:19:11,772 - INFO - gpu: 0
+2021-06-27 17:19:11,772 - INFO - data_path: /data/Datasets_SCOT/
+2021-06-27 17:19:11,772 - INFO - checkpoint_path: ./checkpoints
+2021-06-27 17:19:11,772 - INFO - epoch: 20
+2021-06-27 17:19:11,772 - INFO - resize: 224,320
+2021-06-27 17:19:11,772 - INFO - max_kps_num: 50
+2021-06-27 17:19:11,772 - INFO - split_type: trn
+2021-06-27 17:19:11,772 - INFO - optimizer_type: SGD
+2021-06-27 17:19:11,772 - INFO - lr: 0.001
+2021-06-27 17:19:11,772 - INFO - momentum: 0.9
+2021-06-27 17:19:11,772 - INFO - loss_type: MSE
+2021-06-27 17:19:11,772 - INFO - Options all listed.------------------
+2021-06-27 17:20:03,632 - INFO - Options listed below:----------------
+2021-06-27 17:20:03,632 - INFO - name: framework_train
+2021-06-27 17:20:03,632 - INFO - benchmark: pfpascal
+2021-06-27 17:20:03,632 - INFO - thresh_type: auto
+2021-06-27 17:20:03,632 - INFO - backbone_name: resnet101
+2021-06-27 17:20:03,632 - INFO - ms_rate: 4
+2021-06-27 17:20:03,632 - INFO - feature_channel: 21
+2021-06-27 17:20:03,632 - INFO - batch: 10
+2021-06-27 17:20:03,632 - INFO - gpu: 0
+2021-06-27 17:20:03,632 - INFO - data_path: /data/Datasets_SCOT/
+2021-06-27 17:20:03,632 - INFO - checkpoint_path: ./checkpoints
+2021-06-27 17:20:03,632 - INFO - epoch: 20
+2021-06-27 17:20:03,633 - INFO - resize: 224,320
+2021-06-27 17:20:03,633 - INFO - max_kps_num: 50
+2021-06-27 17:20:03,633 - INFO - split_type: trn
+2021-06-27 17:20:03,633 - INFO - optimizer_type: SGD
+2021-06-27 17:20:03,633 - INFO - lr: 0.001
+2021-06-27 17:20:03,633 - INFO - momentum: 0.9
+2021-06-27 17:20:03,633 - INFO - loss_type: MSE
+2021-06-27 17:20:03,633 - INFO - Options all listed.------------------
+2021-06-27 17:20:58,402 - INFO - Options listed below:----------------
+2021-06-27 17:20:58,402 - INFO - name: framework_train
+2021-06-27 17:20:58,402 - INFO - benchmark: pfpascal
+2021-06-27 17:20:58,403 - INFO - thresh_type: auto
+2021-06-27 17:20:58,403 - INFO - backbone_name: resnet101
+2021-06-27 17:20:58,403 - INFO - ms_rate: 4
+2021-06-27 17:20:58,403 - INFO - feature_channel: 21
+2021-06-27 17:20:58,403 - INFO - batch: 10
+2021-06-27 17:20:58,403 - INFO - gpu: 0
+2021-06-27 17:20:58,403 - INFO - data_path: /data/Datasets_SCOT/
+2021-06-27 17:20:58,403 - INFO - checkpoint_path: ./checkpoints
+2021-06-27 17:20:58,403 - INFO - epoch: 20
+2021-06-27 17:20:58,403 - INFO - resize: 224,320
+2021-06-27 17:20:58,403 - INFO - max_kps_num: 50
+2021-06-27 17:20:58,403 - INFO - split_type: trn
+2021-06-27 17:20:58,403 - INFO - optimizer_type: SGD
+2021-06-27 17:20:58,403 - INFO - lr: 0.001
+2021-06-27 17:20:58,403 - INFO - momentum: 0.9
+2021-06-27 17:20:58,403 - INFO - loss_type: MSE
+2021-06-27 17:20:58,403 - INFO - Options all listed.------------------
+2021-06-27 17:21:39,416 - INFO - Options listed below:----------------
+2021-06-27 17:21:39,416 - INFO - name: framework_train
+2021-06-27 17:21:39,417 - INFO - benchmark: pfpascal
+2021-06-27 17:21:39,417 - INFO - thresh_type: auto
+2021-06-27 17:21:39,417 - INFO - backbone_name: resnet101
+2021-06-27 17:21:39,417 - INFO - ms_rate: 4
+2021-06-27 17:21:39,417 - INFO - feature_channel: 21
+2021-06-27 17:21:39,417 - INFO - batch: 10
+2021-06-27 17:21:39,417 - INFO - gpu: 0
+2021-06-27 17:21:39,417 - INFO - data_path: /data/Datasets_SCOT/
+2021-06-27 17:21:39,417 - INFO - checkpoint_path: ./checkpoints
+2021-06-27 17:21:39,417 - INFO - epoch: 20
+2021-06-27 17:21:39,417 - INFO - resize: 224,320
+2021-06-27 17:21:39,417 - INFO - max_kps_num: 50
+2021-06-27 17:21:39,417 - INFO - split_type: trn
+2021-06-27 17:21:39,417 - INFO - optimizer_type: SGD
+2021-06-27 17:21:39,417 - INFO - lr: 0.001
+2021-06-27 17:21:39,417 - INFO - momentum: 0.9
+2021-06-27 17:21:39,417 - INFO - loss_type: MSE
+2021-06-27 17:21:39,417 - INFO - Options all listed.------------------
+2021-06-27 17:22:04,423 - INFO - Options listed below:----------------
+2021-06-27 17:22:04,423 - INFO - name: framework_train
+2021-06-27 17:22:04,423 - INFO - benchmark: pfpascal
+2021-06-27 17:22:04,423 - INFO - thresh_type: auto
+2021-06-27 17:22:04,424 - INFO - backbone_name: resnet101
+2021-06-27 17:22:04,424 - INFO - ms_rate: 4
+2021-06-27 17:22:04,424 - INFO - feature_channel: 21
+2021-06-27 17:22:04,424 - INFO - batch: 10
+2021-06-27 17:22:04,424 - INFO - gpu: 0
+2021-06-27 17:22:04,424 - INFO - data_path: /data/Datasets_SCOT/
+2021-06-27 17:22:04,424 - INFO - checkpoint_path: ./checkpoints
+2021-06-27 17:22:04,424 - INFO - epoch: 20
+2021-06-27 17:22:04,424 - INFO - resize: 224,320
+2021-06-27 17:22:04,424 - INFO - max_kps_num: 50
+2021-06-27 17:22:04,424 - INFO - split_type: trn
+2021-06-27 17:22:04,424 - INFO - optimizer_type: SGD
+2021-06-27 17:22:04,424 - INFO - lr: 0.001
+2021-06-27 17:22:04,424 - INFO - momentum: 0.9
+2021-06-27 17:22:04,424 - INFO - loss_type: MSE
+2021-06-27 17:22:04,424 - INFO - Options all listed.------------------
+2021-06-27 17:22:23,816 - INFO - Options listed below:----------------
+2021-06-27 17:22:23,816 - INFO - name: framework_train
+2021-06-27 17:22:23,816 - INFO - benchmark: pfpascal
+2021-06-27 17:22:23,816 - INFO - thresh_type: auto
+2021-06-27 17:22:23,816 - INFO - backbone_name: resnet101
+2021-06-27 17:22:23,816 - INFO - ms_rate: 4
+2021-06-27 17:22:23,816 - INFO - feature_channel: 21
+2021-06-27 17:22:23,816 - INFO - batch: 10
+2021-06-27 17:22:23,816 - INFO - gpu: 0
+2021-06-27 17:22:23,816 - INFO - data_path: /data/Datasets_SCOT/
+2021-06-27 17:22:23,816 - INFO - checkpoint_path: ./checkpoints
+2021-06-27 17:22:23,817 - INFO - epoch: 20
+2021-06-27 17:22:23,817 - INFO - resize: 224,320
+2021-06-27 17:22:23,817 - INFO - max_kps_num: 50
+2021-06-27 17:22:23,817 - INFO - split_type: trn
+2021-06-27 17:22:23,817 - INFO - optimizer_type: SGD
+2021-06-27 17:22:23,817 - INFO - lr: 0.001
+2021-06-27 17:22:23,817 - INFO - momentum: 0.9
+2021-06-27 17:22:23,817 - INFO - loss_type: MSE
+2021-06-27 17:22:23,817 - INFO - Options all listed.------------------
+2021-06-27 17:46:00,902 - INFO - Options listed below:----------------
+2021-06-27 17:46:00,902 - INFO - name: framework_train
+2021-06-27 17:46:00,902 - INFO - benchmark: pfpascal
+2021-06-27 17:46:00,902 - INFO - thresh_type: auto
+2021-06-27 17:46:00,903 - INFO - backbone_name: resnet101
+2021-06-27 17:46:00,903 - INFO - ms_rate: 4
+2021-06-27 17:46:00,903 - INFO - feature_channel: 21
+2021-06-27 17:46:00,903 - INFO - batch: 10
+2021-06-27 17:46:00,903 - INFO - gpu: 0
+2021-06-27 17:46:00,903 - INFO - data_path: /data/Datasets_SCOT/
+2021-06-27 17:46:00,903 - INFO - checkpoint_path: ./checkpoints
+2021-06-27 17:46:00,903 - INFO - epoch: 20
+2021-06-27 17:46:00,903 - INFO - resize: 224,320
+2021-06-27 17:46:00,903 - INFO - max_kps_num: 50
+2021-06-27 17:46:00,903 - INFO - split_type: trn
+2021-06-27 17:46:00,903 - INFO - optimizer_type: SGD
+2021-06-27 17:46:00,903 - INFO - lr: 0.001
+2021-06-27 17:46:00,903 - INFO - weight_decay: 0.999
+2021-06-27 17:46:00,903 - INFO - momentum: 0.9
+2021-06-27 17:46:00,903 - INFO - loss_type: BCE
+2021-06-27 17:46:00,903 - INFO - Options all listed.------------------
+2021-06-27 17:46:25,240 - INFO - Options listed below:----------------
+2021-06-27 17:46:25,240 - INFO - name: framework_train
+2021-06-27 17:46:25,240 - INFO - benchmark: pfpascal
+2021-06-27 17:46:25,240 - INFO - thresh_type: auto
+2021-06-27 17:46:25,240 - INFO - backbone_name: resnet101
+2021-06-27 17:46:25,240 - INFO - ms_rate: 4
+2021-06-27 17:46:25,240 - INFO - feature_channel: 21
+2021-06-27 17:46:25,240 - INFO - batch: 10
+2021-06-27 17:46:25,240 - INFO - gpu: 0
+2021-06-27 17:46:25,240 - INFO - data_path: /data/Datasets_SCOT/
+2021-06-27 17:46:25,240 - INFO - checkpoint_path: ./checkpoints
+2021-06-27 17:46:25,240 - INFO - epoch: 20
+2021-06-27 17:46:25,240 - INFO - resize: 224,320
+2021-06-27 17:46:25,240 - INFO - max_kps_num: 50
+2021-06-27 17:46:25,240 - INFO - split_type: trn
+2021-06-27 17:46:25,241 - INFO - optimizer_type: SGD
+2021-06-27 17:46:25,241 - INFO - lr: 0.001
+2021-06-27 17:46:25,241 - INFO - weight_decay: 0.999
+2021-06-27 17:46:25,241 - INFO - momentum: 0.9
+2021-06-27 17:46:25,241 - INFO - loss_type: BCE
+2021-06-27 17:46:25,241 - INFO - Options all listed.------------------
+2021-06-27 17:46:46,838 - INFO - Options listed below:----------------
+2021-06-27 17:46:46,838 - INFO - name: framework_train
+2021-06-27 17:46:46,838 - INFO - benchmark: pfpascal
+2021-06-27 17:46:46,838 - INFO - thresh_type: auto
+2021-06-27 17:46:46,838 - INFO - backbone_name: resnet101
+2021-06-27 17:46:46,838 - INFO - ms_rate: 4
+2021-06-27 17:46:46,838 - INFO - feature_channel: 21
+2021-06-27 17:46:46,838 - INFO - batch: 10
+2021-06-27 17:46:46,838 - INFO - gpu: 0
+2021-06-27 17:46:46,838 - INFO - data_path: /data/Datasets_SCOT/
+2021-06-27 17:46:46,838 - INFO - checkpoint_path: ./checkpoints
+2021-06-27 17:46:46,838 - INFO - epoch: 20
+2021-06-27 17:46:46,838 - INFO - resize: 224,320
+2021-06-27 17:46:46,838 - INFO - max_kps_num: 50
+2021-06-27 17:46:46,838 - INFO - split_type: trn
+2021-06-27 17:46:46,838 - INFO - optimizer_type: SGD
+2021-06-27 17:46:46,838 - INFO - lr: 0.001
+2021-06-27 17:46:46,838 - INFO - weight_decay: 0.999
+2021-06-27 17:46:46,838 - INFO - momentum: 0.9
+2021-06-27 17:46:46,839 - INFO - loss_type: BCE
+2021-06-27 17:46:46,839 - INFO - Options all listed.------------------
+2021-06-27 17:47:17,487 - INFO - Options listed below:----------------
+2021-06-27 17:47:17,487 - INFO - name: framework_train
+2021-06-27 17:47:17,487 - INFO - benchmark: pfpascal
+2021-06-27 17:47:17,487 - INFO - thresh_type: auto
+2021-06-27 17:47:17,487 - INFO - backbone_name: resnet101
+2021-06-27 17:47:17,487 - INFO - ms_rate: 4
+2021-06-27 17:47:17,487 - INFO - feature_channel: 21
+2021-06-27 17:47:17,487 - INFO - batch: 10
+2021-06-27 17:47:17,487 - INFO - gpu: 0
+2021-06-27 17:47:17,487 - INFO - data_path: /data/Datasets_SCOT/
+2021-06-27 17:47:17,487 - INFO - checkpoint_path: ./checkpoints
+2021-06-27 17:47:17,487 - INFO - epoch: 20
+2021-06-27 17:47:17,487 - INFO - resize: 224,320
+2021-06-27 17:47:17,487 - INFO - max_kps_num: 50
+2021-06-27 17:47:17,487 - INFO - split_type: trn
+2021-06-27 17:47:17,487 - INFO - optimizer_type: SGD
+2021-06-27 17:47:17,487 - INFO - lr: 0.001
+2021-06-27 17:47:17,487 - INFO - weight_decay: 0.999
+2021-06-27 17:47:17,488 - INFO - momentum: 0.9
+2021-06-27 17:47:17,488 - INFO - loss_type: BCE
+2021-06-27 17:47:17,488 - INFO - Options all listed.------------------
+2021-06-27 17:49:42,935 - INFO - Options listed below:----------------
+2021-06-27 17:49:42,935 - INFO - name: framework_train
+2021-06-27 17:49:42,935 - INFO - benchmark: pfpascal
+2021-06-27 17:49:42,935 - INFO - thresh_type: auto
+2021-06-27 17:49:42,936 - INFO - backbone_name: resnet101
+2021-06-27 17:49:42,936 - INFO - ms_rate: 4
+2021-06-27 17:49:42,936 - INFO - feature_channel: 21
+2021-06-27 17:49:42,936 - INFO - batch: 10
+2021-06-27 17:49:42,936 - INFO - gpu: 0
+2021-06-27 17:49:42,936 - INFO - data_path: /data/Datasets_SCOT/
+2021-06-27 17:49:42,936 - INFO - checkpoint_path: ./checkpoints
+2021-06-27 17:49:42,936 - INFO - epoch: 20
+2021-06-27 17:49:42,936 - INFO - resize: 224,320
+2021-06-27 17:49:42,936 - INFO - max_kps_num: 50
+2021-06-27 17:49:42,936 - INFO - split_type: trn
+2021-06-27 17:49:42,936 - INFO - optimizer_type: SGD
+2021-06-27 17:49:42,936 - INFO - lr: 0.001
+2021-06-27 17:49:42,936 - INFO - weight_decay: 0.999
+2021-06-27 17:49:42,936 - INFO - momentum: 0.9
+2021-06-27 17:49:42,936 - INFO - loss_type: BCE
+2021-06-27 17:49:42,936 - INFO - Options all listed.------------------
+2021-06-27 17:53:08,174 - INFO - Options listed below:----------------
+2021-06-27 17:53:08,174 - INFO - name: framework_train
+2021-06-27 17:53:08,174 - INFO - benchmark: pfpascal
+2021-06-27 17:53:08,174 - INFO - thresh_type: auto
+2021-06-27 17:53:08,174 - INFO - backbone_name: resnet101
+2021-06-27 17:53:08,174 - INFO - ms_rate: 4
+2021-06-27 17:53:08,174 - INFO - feature_channel: 21
+2021-06-27 17:53:08,174 - INFO - batch: 10
+2021-06-27 17:53:08,174 - INFO - gpu: 0
+2021-06-27 17:53:08,174 - INFO - data_path: /data/Datasets_SCOT/
+2021-06-27 17:53:08,174 - INFO - checkpoint_path: ./checkpoints
+2021-06-27 17:53:08,174 - INFO - epoch: 20
+2021-06-27 17:53:08,174 - INFO - resize: 224,320
+2021-06-27 17:53:08,174 - INFO - max_kps_num: 50
+2021-06-27 17:53:08,174 - INFO - split_type: trn
+2021-06-27 17:53:08,175 - INFO - optimizer_type: SGD
+2021-06-27 17:53:08,175 - INFO - lr: 0.001
+2021-06-27 17:53:08,175 - INFO - weight_decay: 0.999
+2021-06-27 17:53:08,175 - INFO - momentum: 0.9
+2021-06-27 17:53:08,175 - INFO - loss_type: BCE
+2021-06-27 17:53:08,175 - INFO - Options all listed.------------------
+2021-06-27 17:54:15,275 - INFO - Options listed below:----------------
+2021-06-27 17:54:15,275 - INFO - name: framework_train
+2021-06-27 17:54:15,275 - INFO - benchmark: pfpascal
+2021-06-27 17:54:15,275 - INFO - thresh_type: auto
+2021-06-27 17:54:15,275 - INFO - backbone_name: resnet101
+2021-06-27 17:54:15,275 - INFO - ms_rate: 4
+2021-06-27 17:54:15,275 - INFO - feature_channel: 21
+2021-06-27 17:54:15,275 - INFO - batch: 10
+2021-06-27 17:54:15,275 - INFO - gpu: 0
+2021-06-27 17:54:15,275 - INFO - data_path: /data/Datasets_SCOT/
+2021-06-27 17:54:15,275 - INFO - checkpoint_path: ./checkpoints
+2021-06-27 17:54:15,275 - INFO - epoch: 20
+2021-06-27 17:54:15,275 - INFO - resize: 224,320
+2021-06-27 17:54:15,275 - INFO - max_kps_num: 50
+2021-06-27 17:54:15,276 - INFO - split_type: trn
+2021-06-27 17:54:15,276 - INFO - optimizer_type: SGD
+2021-06-27 17:54:15,276 - INFO - lr: 0.001
+2021-06-27 17:54:15,276 - INFO - weight_decay: 0.999
+2021-06-27 17:54:15,276 - INFO - momentum: 0.9
+2021-06-27 17:54:15,276 - INFO - loss_type: BCE
+2021-06-27 17:54:15,276 - INFO - Options all listed.------------------
+2021-06-27 17:55:19,586 - INFO - Options listed below:----------------
+2021-06-27 17:55:19,586 - INFO - name: framework_train
+2021-06-27 17:55:19,586 - INFO - benchmark: pfpascal
+2021-06-27 17:55:19,586 - INFO - thresh_type: auto
+2021-06-27 17:55:19,586 - INFO - backbone_name: resnet101
+2021-06-27 17:55:19,586 - INFO - ms_rate: 4
+2021-06-27 17:55:19,586 - INFO - feature_channel: 21
+2021-06-27 17:55:19,586 - INFO - batch: 10
+2021-06-27 17:55:19,586 - INFO - gpu: 0
+2021-06-27 17:55:19,586 - INFO - data_path: /data/Datasets_SCOT/
+2021-06-27 17:55:19,586 - INFO - checkpoint_path: ./checkpoints
+2021-06-27 17:55:19,586 - INFO - epoch: 20
+2021-06-27 17:55:19,586 - INFO - resize: 224,320
+2021-06-27 17:55:19,586 - INFO - max_kps_num: 50
+2021-06-27 17:55:19,587 - INFO - split_type: trn
+2021-06-27 17:55:19,587 - INFO - optimizer_type: SGD
+2021-06-27 17:55:19,587 - INFO - lr: 0.001
+2021-06-27 17:55:19,587 - INFO - weight_decay: 0.999
+2021-06-27 17:55:19,587 - INFO - momentum: 0.9
+2021-06-27 17:55:19,587 - INFO - loss_type: BCE
+2021-06-27 17:55:19,587 - INFO - Options all listed.------------------
+2021-06-27 17:59:16,214 - INFO - Options listed below:----------------
+2021-06-27 17:59:16,214 - INFO - name: framework_train
+2021-06-27 17:59:16,214 - INFO - benchmark: pfpascal
+2021-06-27 17:59:16,214 - INFO - thresh_type: auto
+2021-06-27 17:59:16,214 - INFO - backbone_name: resnet101
+2021-06-27 17:59:16,214 - INFO - ms_rate: 4
+2021-06-27 17:59:16,214 - INFO - feature_channel: 21
+2021-06-27 17:59:16,214 - INFO - batch: 10
+2021-06-27 17:59:16,214 - INFO - gpu: 0
+2021-06-27 17:59:16,215 - INFO - data_path: /data/Datasets_SCOT/
+2021-06-27 17:59:16,215 - INFO - checkpoint_path: ./checkpoints
+2021-06-27 17:59:16,215 - INFO - epoch: 20
+2021-06-27 17:59:16,215 - INFO - resize: 224,320
+2021-06-27 17:59:16,215 - INFO - max_kps_num: 50
+2021-06-27 17:59:16,215 - INFO - split_type: trn
+2021-06-27 17:59:16,215 - INFO - optimizer_type: SGD
+2021-06-27 17:59:16,215 - INFO - lr: 0.001
+2021-06-27 17:59:16,215 - INFO - weight_decay: 0.999
+2021-06-27 17:59:16,215 - INFO - momentum: 0.9
+2021-06-27 17:59:16,215 - INFO - loss_type: BCE
+2021-06-27 17:59:16,215 - INFO - Options all listed.------------------
+2021-06-27 18:01:26,827 - INFO - Options listed below:----------------
+2021-06-27 18:01:26,827 - INFO - name: framework_train
+2021-06-27 18:01:26,827 - INFO - benchmark: pfpascal
+2021-06-27 18:01:26,827 - INFO - thresh_type: auto
+2021-06-27 18:01:26,827 - INFO - backbone_name: resnet101
+2021-06-27 18:01:26,827 - INFO - ms_rate: 4
+2021-06-27 18:01:26,827 - INFO - feature_channel: 21
+2021-06-27 18:01:26,827 - INFO - batch: 10
+2021-06-27 18:01:26,828 - INFO - gpu: 0
+2021-06-27 18:01:26,828 - INFO - data_path: /data/Datasets_SCOT/
+2021-06-27 18:01:26,828 - INFO - checkpoint_path: ./checkpoints
+2021-06-27 18:01:26,828 - INFO - epoch: 20
+2021-06-27 18:01:26,828 - INFO - resize: 224,320
+2021-06-27 18:01:26,828 - INFO - max_kps_num: 50
+2021-06-27 18:01:26,828 - INFO - split_type: trn
+2021-06-27 18:01:26,828 - INFO - optimizer_type: SGD
+2021-06-27 18:01:26,828 - INFO - lr: 0.001
+2021-06-27 18:01:26,828 - INFO - weight_decay: 0.999
+2021-06-27 18:01:26,828 - INFO - momentum: 0.9
+2021-06-27 18:01:26,828 - INFO - loss_type: BCE
+2021-06-27 18:01:26,828 - INFO - Options all listed.------------------
+2021-06-27 18:01:57,583 - INFO - Options listed below:----------------
+2021-06-27 18:01:57,583 - INFO - name: framework_train
+2021-06-27 18:01:57,583 - INFO - benchmark: pfpascal
+2021-06-27 18:01:57,583 - INFO - thresh_type: auto
+2021-06-27 18:01:57,584 - INFO - backbone_name: resnet101
+2021-06-27 18:01:57,584 - INFO - ms_rate: 4
+2021-06-27 18:01:57,584 - INFO - feature_channel: 21
+2021-06-27 18:01:57,584 - INFO - batch: 10
+2021-06-27 18:01:57,584 - INFO - gpu: 0
+2021-06-27 18:01:57,584 - INFO - data_path: /data/Datasets_SCOT/
+2021-06-27 18:01:57,584 - INFO - checkpoint_path: ./checkpoints
+2021-06-27 18:01:57,584 - INFO - epoch: 20
+2021-06-27 18:01:57,584 - INFO - resize: 224,320
+2021-06-27 18:01:57,584 - INFO - max_kps_num: 50
+2021-06-27 18:01:57,584 - INFO - split_type: trn
+2021-06-27 18:01:57,584 - INFO - optimizer_type: SGD
+2021-06-27 18:01:57,584 - INFO - lr: 0.001
+2021-06-27 18:01:57,584 - INFO - weight_decay: 0.999
+2021-06-27 18:01:57,584 - INFO - momentum: 0.9
+2021-06-27 18:01:57,584 - INFO - loss_type: BCE
+2021-06-27 18:01:57,584 - INFO - Options all listed.------------------
+2021-06-27 18:04:06,280 - INFO - Options listed below:----------------
+2021-06-27 18:04:06,281 - INFO - name: framework_train
+2021-06-27 18:04:06,281 - INFO - benchmark: pfpascal
+2021-06-27 18:04:06,281 - INFO - thresh_type: auto
+2021-06-27 18:04:06,281 - INFO - backbone_name: resnet101
+2021-06-27 18:04:06,281 - INFO - ms_rate: 4
+2021-06-27 18:04:06,281 - INFO - feature_channel: 21
+2021-06-27 18:04:06,281 - INFO - batch: 10
+2021-06-27 18:04:06,281 - INFO - gpu: 0
+2021-06-27 18:04:06,281 - INFO - data_path: /data/Datasets_SCOT/
+2021-06-27 18:04:06,281 - INFO - checkpoint_path: ./checkpoints
+2021-06-27 18:04:06,281 - INFO - epoch: 20
+2021-06-27 18:04:06,281 - INFO - resize: 224,320
+2021-06-27 18:04:06,281 - INFO - max_kps_num: 50
+2021-06-27 18:04:06,281 - INFO - split_type: trn
+2021-06-27 18:04:06,281 - INFO - optimizer_type: SGD
+2021-06-27 18:04:06,281 - INFO - lr: 0.001
+2021-06-27 18:04:06,281 - INFO - weight_decay: 0.999
+2021-06-27 18:04:06,281 - INFO - momentum: 0.9
+2021-06-27 18:04:06,282 - INFO - loss_type: BCE
+2021-06-27 18:04:06,282 - INFO - Options all listed.------------------
+2021-06-27 18:05:46,820 - INFO - Options listed below:----------------
+2021-06-27 18:05:46,820 - INFO - name: framework_train
+2021-06-27 18:05:46,820 - INFO - benchmark: pfpascal
+2021-06-27 18:05:46,820 - INFO - thresh_type: auto
+2021-06-27 18:05:46,820 - INFO - backbone_name: resnet101
+2021-06-27 18:05:46,820 - INFO - ms_rate: 4
+2021-06-27 18:05:46,820 - INFO - feature_channel: 21
+2021-06-27 18:05:46,820 - INFO - batch: 10
+2021-06-27 18:05:46,821 - INFO - gpu: 0
+2021-06-27 18:05:46,821 - INFO - data_path: /data/Datasets_SCOT/
+2021-06-27 18:05:46,821 - INFO - checkpoint_path: ./checkpoints
+2021-06-27 18:05:46,821 - INFO - epoch: 20
+2021-06-27 18:05:46,821 - INFO - resize: 224,320
+2021-06-27 18:05:46,821 - INFO - max_kps_num: 50
+2021-06-27 18:05:46,821 - INFO - split_type: trn
+2021-06-27 18:05:46,821 - INFO - optimizer_type: SGD
+2021-06-27 18:05:46,821 - INFO - lr: 0.001
+2021-06-27 18:05:46,821 - INFO - weight_decay: 0.999
+2021-06-27 18:05:46,821 - INFO - momentum: 0.9
+2021-06-27 18:05:46,821 - INFO - loss_type: BCE
+2021-06-27 18:05:46,821 - INFO - Options all listed.------------------
+2021-06-27 18:07:07,593 - INFO - Options listed below:----------------
+2021-06-27 18:07:07,593 - INFO - name: framework_train
+2021-06-27 18:07:07,593 - INFO - benchmark: pfpascal
+2021-06-27 18:07:07,593 - INFO - thresh_type: auto
+2021-06-27 18:07:07,593 - INFO - backbone_name: resnet101
+2021-06-27 18:07:07,593 - INFO - ms_rate: 4
+2021-06-27 18:07:07,593 - INFO - feature_channel: 21
+2021-06-27 18:07:07,593 - INFO - batch: 10
+2021-06-27 18:07:07,593 - INFO - gpu: 0
+2021-06-27 18:07:07,593 - INFO - data_path: /data/Datasets_SCOT/
+2021-06-27 18:07:07,593 - INFO - checkpoint_path: ./checkpoints
+2021-06-27 18:07:07,593 - INFO - epoch: 20
+2021-06-27 18:07:07,594 - INFO - resize: 224,320
+2021-06-27 18:07:07,594 - INFO - max_kps_num: 50
+2021-06-27 18:07:07,594 - INFO - split_type: trn
+2021-06-27 18:07:07,594 - INFO - optimizer_type: SGD
+2021-06-27 18:07:07,594 - INFO - lr: 0.001
+2021-06-27 18:07:07,594 - INFO - weight_decay: 0.999
+2021-06-27 18:07:07,594 - INFO - momentum: 0.9
+2021-06-27 18:07:07,594 - INFO - loss_type: BCE
+2021-06-27 18:07:07,594 - INFO - Options all listed.------------------

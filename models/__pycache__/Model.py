@@ -140,26 +140,23 @@ class MMNet(nn.Module):
         rate = opt.ms_rate
         inner_channel = opt.feature_channel
 
-        if self.backbone_name == 'resnet50':
+        if self.backbone_net_name == 'resnet50':
             self.backbone = resnet.resnet50(pretrained=True).to(device)
             self.nbottlenecks = [3, 4, 6, 3]
             self.feature_channels = [256, 512, 1024, 2048]
 
-        elif self.backbone_name == 'resnet101':
+        elif self.backbone_net_name == 'resnet101':
             self.backbone = resnet.resnet101(pretrained=True).to(device)
             self.nbottlenecks = [3, 4, 23, 3]
-            self.feature_channels = [256, 512, 1024, 2048]
 
-        elif self.backbone_name == 'resnext-101':
+        elif self.backbone_net_name == 'resnext-101':
             self.backbone = resnet.resnext101_32x8d(pretrained=True).to(device)
             self.nbottlenecks = [3, 4, 23, 3]
-            self.feature_channels = [256, 512, 1024, 2048]
 
-        elif self.backbone_name == 'fcn-resnet101':
+        elif self.backbone_net_name == 'fcn-resnet101':
             self.backbone = gcv.models.get_fcn_resnet101_voc(
                 pretrained=True).to(device).pretrained
             self.nbottlenecks = [3, 4, 23, 3]
-            self.feature_channels = [256, 512, 1024, 2048]
 
         self.features = self.getResNetFeature_List
 
@@ -326,10 +323,10 @@ class MMNet(nn.Module):
             features_src.append(i[:batch])
             features_trg.append(i[batch:])
 
-        if self.backbone_name in ["resnet101", "resnext-101", 'fcn-resnet101']:
+        if self.backbone_net_name in ["resnet101", "resnext-101", 'fcn-resnet101']:
             calLayer4 = self.calLayer4
             calLayer3 = self.calLayer3
-        elif self.backbone_name == "resnet50":
+        elif self.backbone_net_name == "resnet50":
             calLayer4 = self._res50_calLayer4
             calLayer3 = self._res50_calLayer3
         calLayer2 = self.calLayer2
