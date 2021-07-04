@@ -16,7 +16,7 @@ from data import PascalDataset as Dataset
 from models import Loss, Optimizer
 from models import Model as Model
 
-from utils import geometry
+from utils import geometry, visualizer
 from evaluation_tools import evaluation
 
 
@@ -156,9 +156,11 @@ def train(logger, opt):
 
             running_loss += loss.item()
 
-            if (i+1) % 20 == 0:
+            if (i+1) % 2 == 0:
                 logger.info("[%d, %5d] loss: %.3f" %
                             (epoch+1, i+1, running_loss/20))
+                visualizer.visualize_pred(data, pred)
+                exit()
                 running_loss = 0.0
         logger.info('saving %dth ckp in %s.' % (epoch, ckp_path))
         torch.save(model.state_dict(), os.path.join(

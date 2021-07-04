@@ -1,3 +1,4 @@
+
 import os
 import torch
 import numpy as np
@@ -7,7 +8,7 @@ from PIL import Image
 #import imgaug.augmenters as iaa
 
 import torch.nn.functional as F
-
+from utils import visualizer
 import csv
 
 
@@ -177,6 +178,8 @@ class CorrespondenceDataset(torch.utils.data.Dataset):
 
     def resize(self, image, kps):
         r"""jointly resize image and correspond keypoints values"""
+        # visualizer.visualize_image_with_annotation(
+        #     image, kps, normalized=True, suffix="original")
         image = image.unsqueeze(0)
         orig_size = image.shape
 
@@ -187,6 +190,10 @@ class CorrespondenceDataset(torch.utils.data.Dataset):
             self.target_height, self.target_width), mode="bilinear", align_corners=False).squeeze(0)
         kps[0, :] *= inter_ratio_w
         kps[1, :] *= inter_ratio_h
+
+        # visualizer.visualize_image_with_annotation(
+        #     image, kps, normalized=False, suffix="resized")
+        # exit()
 
         padded_kps = torch.zeros(2, self.max_kps_num)
         n = kps.shape[1]

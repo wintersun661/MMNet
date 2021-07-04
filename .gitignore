@@ -3,3 +3,4 @@ checkpoints/*
 ckp_*/*
 visualizations/*
 *.pyc
+debug_*/*

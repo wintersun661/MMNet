@@ -6,6 +6,7 @@ import pandas as pd
 import numpy as np
 
 import torch
+from utils import visualizer
 
 
 def read_mat(path, obj_name):
@@ -84,6 +85,9 @@ class CorrespondenceDataset(BaseDataset.CorrespondenceDataset):
                 sample['src_kps'][0]
             sample['trg_kps'][0] = sample['trg_img'].size()[2] - \
                 sample['trg_kps'][0]
+
+        # visualizer.visualize_image_with_annotation(
+        #     sample['src_img'], sample['src_kps'][:, :sample["valid_kps_num"]], sample['src_bbox'], normalized=True, suffix="src")
 
         return sample
 

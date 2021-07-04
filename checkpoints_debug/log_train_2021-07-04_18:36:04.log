@@ -1,0 +1,23 @@
+2021-07-04 18:36:04,284 - INFO - Options listed below:----------------
+2021-07-04 18:36:04,284 - INFO - name: framework_train
+2021-07-04 18:36:04,284 - INFO - benchmark: pfpascal
+2021-07-04 18:36:04,284 - INFO - thresh_type: auto
+2021-07-04 18:36:04,284 - INFO - backbone_name: resnet101
+2021-07-04 18:36:04,284 - INFO - ms_rate: 4
+2021-07-04 18:36:04,284 - INFO - feature_channel: 21
+2021-07-04 18:36:04,285 - INFO - batch: 10
+2021-07-04 18:36:04,285 - INFO - gpu: 0
+2021-07-04 18:36:04,285 - INFO - data_path: /data/Datasets_SCOT/
+2021-07-04 18:36:04,285 - INFO - checkpoint_path: ./checkpoints_debug
+2021-07-04 18:36:04,285 - INFO - visualization_path: visualization
+2021-07-04 18:36:04,285 - INFO - model_type: MMNet
+2021-07-04 18:36:04,285 - INFO - epoch: 20
+2021-07-04 18:36:04,285 - INFO - resize: 224,320
+2021-07-04 18:36:04,285 - INFO - max_kps_num: 50
+2021-07-04 18:36:04,285 - INFO - split_type: trn
+2021-07-04 18:36:04,285 - INFO - optimizer_type: SGD
+2021-07-04 18:36:04,285 - INFO - lr: 0.001
+2021-07-04 18:36:04,285 - INFO - weight_decay: 0.999
+2021-07-04 18:36:04,285 - INFO - momentum: 0.9
+2021-07-04 18:36:04,285 - INFO - loss_type: BCE
+2021-07-04 18:36:04,285 - INFO - Options all listed.------------------
