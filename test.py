@@ -5,6 +5,8 @@ import os
 import random
 import torch.nn.functional as F
 
+from utils import visualizer
+
 # utility import
 from logger import BaseLogger as Logger
 from options import TestOptions as Options
@@ -41,8 +43,9 @@ def test(logger, opt):
     if opt.ckp_type == 'latest':
         ckp_name = str(opt.epoch)+'.pth'
 
-    #ckp_fullname = os.path.isfile(os.path.join(ckp_path, ckp_name))
-    ckp_fullname = "/home/zysong/SC_BDCN/ckp_fcn21_nonlocal/2021-03-09_08:25_best"
+    ckp_fullname = os.path.join(ckp_path, ckp_name)
+    print(ckp_fullname)
+    #ckp_fullname = "/home/zysong/SC_BDCN/ckp_fcn21_nonlocal/2021-03-09_08:25_best"
 
     if not os.path.isfile(ckp_fullname):
         logger.error("Null checkpoint file!")
@@ -99,6 +102,8 @@ def test(logger, opt):
                          pair_pck,
                          sum(pck_list) / (i*batch_size+k+1),
                          data['pair_class'][k]))
+            visualizer.visualize_pred(
+                data, pred, suffix="", idx=str(i), visualization_path=os.path.join(ckp_path, opt.visualization_path, 'test'))
 
 
 if __name__ == "__main__":

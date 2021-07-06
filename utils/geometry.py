@@ -42,6 +42,7 @@ def getNonNeighborhoodIndices(kps, featsShape, originalShape, kernel=7):
 
 
 def BilinearInterpolate(kps, correlationMap, originalShape):
+    # x: width, y:height
     x, y = kps.copy()
     h, w = correlationMap.shape[:2]
     correlationMap = correlationMap.view(h, w, -1)

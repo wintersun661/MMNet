@@ -5,11 +5,20 @@ import numpy as np
 from torchvision import transforms
 
 from PIL import Image
-#import imgaug.augmenters as iaa
+# import imgaug.augmenters as iaa
 
 import torch.nn.functional as F
 from utils import visualizer
 import csv
+import scipy.io as sio
+
+
+def read_mat(path, obj_name):
+    r"""Read specified objects from Matlab data file, (.mat)"""
+    mat_contents = sio.loadmat(path)
+    mat_obj = mat_contents[obj_name]
+
+    return mat_obj
 
 
 def readFile(filePath):
@@ -138,10 +147,9 @@ class CorrespondenceDataset(torch.utils.data.Dataset):
             self.trg_imnames, index)
 
         # keypoints tensors
-        sample["src_kps"] = self.get_points(
-            self.src_kps, index)
-        sample["trg_kps"] = self.get_points(
-            self.trg_kps, index)
+        sample["src_kps"], sample["trg_kps"], sample['src_bbox'], sample['trg_bbox'] = self.get_points(
+            index)
+
         sample["valid_kps_num"] = len(sample["src_kps"][0])
 
         # perform image normalization with imagenet mean & std
@@ -173,8 +181,34 @@ class CorrespondenceDataset(torch.utils.data.Dataset):
         image = torch.tensor(image.transpose(2, 0, 1).astype(np.float32))
         return image
 
-    def get_points(self, pts, index):
-        return pts[index]
+    def get_points(self, index):
+        src_imname = self.src_imnames[index]
+        trg_imname = self.trg_imnames[index]
+
+        cls = self.cls_ids[index]
+
+        src_anns = os.path.join(self.ann_path, self.cls[cls],
+                                os.path.basename(src_imname))[:-4] + '.mat'
+        trg_anns = os.path.join(self.ann_path, self.cls[cls],
+                                os.path.basename(trg_imname))[:-4] + '.mat'
+        src_kp = torch.tensor(read_mat(src_anns, 'kps')).float()
+        trg_kp = torch.tensor(read_mat(trg_anns, 'kps')).float()
+        src_box = torch.tensor(read_mat(src_anns, 'bbox')[0].astype(float))
+        trg_box = torch.tensor(read_mat(trg_anns, 'bbox')[0].astype(float))
+
+        src_kps = []
+        trg_kps = []
+        for src_kk, trg_kk in zip(src_kp, trg_kp):
+            if len(torch.isnan(src_kk).nonzero()) != 0 or \
+                    len(torch.isnan(trg_kk).nonzero()) != 0:
+                continue
+            else:
+                src_kps.append(src_kk)
+                trg_kps.append(trg_kk)
+        src_kps = torch.stack(src_kps).t()
+        trg_kps = torch.stack(trg_kps).t()
+
+        return src_kps, trg_kps, src_box, trg_box
 
     def resize(self, image, kps):
         r"""jointly resize image and correspond keypoints values"""

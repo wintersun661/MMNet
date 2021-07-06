@@ -62,6 +62,8 @@ def visualize_pred(data, pred, visualization_path='./debug_visualizated', suffix
     if not os.path.isdir(visualization_path):
         os.makedirs(visualization_path)
 
+    w, h = data['src_img'][0].shape[1:3]
+
     save_name = "pred"
     if suffix != "":
         save_name += "_"+suffix
@@ -145,7 +147,7 @@ def visualize_pred(data, pred, visualization_path='./debug_visualizated', suffix
                                                 :data['valid_kps_num'][i]]
             print(srcImg.shape)
             prdKps = geometry.predict_kps(
-                srcKps, pred[j][shift][i], originalShape=srcImg.shape[:2])
+                srcKps, pred[j][shift][i], originalShape=[h, w])
             jointImg = torch.cat((srcImg, trgImg), 0)
             jointImg = torch.cat((srcImg, trgImg), 0)
 

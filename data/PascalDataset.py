@@ -39,34 +39,6 @@ class CorrespondenceDataset(BaseDataset.CorrespondenceDataset):
         if self.split_name == "trn":
             self.flip = self.train_data.iloc[:, 3].values.astype("int")
 
-        self.src_bbox = []
-        self.trg_bbox = []
-
-        for src_imname, trg_imname, cls in zip(self.src_imnames, self.trg_imnames, self.cls_ids):
-            src_anns = os.path.join(self.ann_path, self.cls[cls],
-                                    os.path.basename(src_imname))[:-4] + '.mat'
-            trg_anns = os.path.join(self.ann_path, self.cls[cls],
-                                    os.path.basename(trg_imname))[:-4] + '.mat'
-
-            src_kp = torch.tensor(read_mat(src_anns, 'kps')).float()
-            trg_kp = torch.tensor(read_mat(trg_anns, 'kps')).float()
-            src_box = torch.tensor(read_mat(src_anns, 'bbox')[0].astype(float))
-            trg_box = torch.tensor(read_mat(trg_anns, 'bbox')[0].astype(float))
-
-            src_kps = []
-            trg_kps = []
-            for src_kk, trg_kk in zip(src_kp, trg_kp):
-                if len(torch.isnan(src_kk).nonzero()) != 0 or \
-                        len(torch.isnan(trg_kk).nonzero()) != 0:
-                    continue
-                else:
-                    src_kps.append(src_kk)
-                    trg_kps.append(trg_kk)
-            self.src_kps.append(torch.stack(src_kps).t())
-            self.trg_kps.append(torch.stack(trg_kps).t())
-            self.src_bbox.append(src_box)
-            self.trg_bbox.append(trg_box)
-
         self.src_imnames = list(
             map(lambda x: os.path.basename(x), self.src_imnames))
         self.trg_imnames = list(
@@ -75,16 +47,17 @@ class CorrespondenceDataset(BaseDataset.CorrespondenceDataset):
     def __getitem__(self, index):
         sample = super(CorrespondenceDataset, self).__getitem__(index)
 
-        sample['src_bbox'] = self.src_bbox[index].to(self.device)
-        sample['trg_bbox'] = self.trg_bbox[index].to(self.device)
         sample['pckthres'] = self.get_pckthres(sample).to(self.device)
 
         # Horizontal flip of key-points when training
-        if self.split_name == 'trn' and self.flip[index]:
-            sample['src_kps'][0] = sample['src_img'].size()[2] - \
-                sample['src_kps'][0]
-            sample['trg_kps'][0] = sample['trg_img'].size()[2] - \
-                sample['trg_kps'][0]
+        # if self.split_name == 'trn' and self.flip[index]:
+        #     print(sample['src_kps'][0])
+        #     sample['src_kps'][0] = sample['src_img'].size()[2] - \
+        #         sample['src_kps'][0]
+        #     sample['trg_kps'][0] = sample['trg_img'].size()[2] - \
+        #         sample['trg_kps'][0]
+        if self.split_name == "trn":
+            sample['flip'] = self.flip[index]
 
         # visualizer.visualize_image_with_annotation(
         #     sample['src_img'], sample['src_kps'][:, :sample["valid_kps_num"]], sample['src_bbox'], normalized=True, suffix="src")
