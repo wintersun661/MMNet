@@ -22,7 +22,7 @@ class OptionParser():
         self.parser.add_argument('--feature_channel', type=int, default=21)
 
         # hyper-parameters shared by train & test
-        self.parser.add_argument('--batch', type=int, default=10)
+        self.parser.add_argument('--batch', type=int, default=5)
 
         # device set
         self.parser.add_argument('--gpu', type=str, default="0")

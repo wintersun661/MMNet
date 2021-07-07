@@ -18,7 +18,7 @@ from data import PascalDataset as Dataset
 from models import Loss, Optimizer
 from models import Model as Model
 
-from utils import geometry
+from utils import geometry as geometry
 from evaluation_tools import evaluation
 
 
@@ -33,9 +33,9 @@ def fix_random_seed(seed=121):
 def test(logger, opt):
 
     # insanity check for ckp file
-    if not os.path.isdir(opt.checkpoint_path):
-        logger.error("Null checkpoint file list!")
-        exit()
+    # if not os.path.isdir(opt.checkpoint_path):
+    #     logger.error("Null checkpoint file list!")
+    #     exit()
 
     ckp_path = opt.checkpoint_path
     ckp_name = opt.ckp_type+'.pth'
@@ -44,8 +44,9 @@ def test(logger, opt):
         ckp_name = str(opt.epoch)+'.pth'
 
     ckp_fullname = os.path.join(ckp_path, ckp_name)
+
     print(ckp_fullname)
-    #ckp_fullname = "/home/zysong/SC_BDCN/ckp_fcn21_nonlocal/2021-03-09_08:25_best"
+    #ckp_fullname = "/home/zysong/SC_BDCN/F_r101_pascal_21/2021-03-13_11:03_best"
 
     if not os.path.isfile(ckp_fullname):
         logger.error("Null checkpoint file!")
@@ -69,10 +70,11 @@ def test(logger, opt):
     test_dataset = Dataset.CorrespondenceDataset(
         opt.benchmark, opt.data_path, opt.thresh_type, "test", device, opt.resize, opt.max_kps_num)
     test_generator = torch.utils.data.DataLoader(
-        test_dataset, batch_size=batch_size, shuffle=True, num_workers=0)
+        test_dataset, batch_size=batch_size, shuffle=False, num_workers=0)
 
     # model initialization
     model = Model.MMNet(opt).to(device)
+    model.backbone.eval()
     model.load_state_dict(torch.load(ckp_fullname))
 
     zero_pcks = 0
@@ -88,6 +90,7 @@ def test(logger, opt):
 
         for k in range(len(data["src_imname"])):
             tic = time.time()
+
             prd_kps = geometry.predict_kps(
                 data["src_kps"][k][:, :data["valid_kps_num"][k]], pred[opt.resolution][0][k], originalShape=target_shape)
             prd_kps = torch.from_numpy(np.array(prd_kps)).to(device)
@@ -109,10 +112,9 @@ def test(logger, opt):
 if __name__ == "__main__":
     print("currently executing test.py file.")
 
-    logger = Logger.Logger(suffix='test', time_stamp=True).createLogger()
-
     options = Options.OptionParser().parse()
-
+    logger = Logger.Logger(file_path=options.checkpoint_path,
+                           time_stamp=True, suffix="train").createLogger()
     args = vars(options)
     logger.info("Options listed below:----------------")
     for k, v in args.items():

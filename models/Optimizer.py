@@ -3,6 +3,14 @@ import torch.optim as optim
 import re
 
 
+def adjust_learning_rate(optimizer, gamma=0.1, logger=None):
+    """Sets the learning rate to the initial LR decayed by 10 every 30 epochs"""
+    for param_group in optimizer.param_groups:
+        param_group['lr'] = param_group['lr'] * gamma
+        if logger:
+            logger.info('%s: %s' % (param_group['name'], param_group['lr']))
+
+
 def createOptimizer(opt, net):
     params = []
 
@@ -66,5 +74,7 @@ def createOptimizer(opt, net):
     if opt.optimizer_type == "SGD":
         optimizer = torch.optim.SGD(params, momentum=opt.momentum,
                                     lr=opt.lr, weight_decay=opt.weight_decay)
+    if opt.optimizer_type == "Adam":
+        optimizer = torch.optim.Adam()
 
     return optimizer

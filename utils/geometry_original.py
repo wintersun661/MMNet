@@ -20,7 +20,7 @@ def buildOneHot(index, featsShape):
     return res
 
 
-def getNonNeighborhoodIndices(kps, featsShape, originalShape, kernel=7):
+def getNonNeighborhoodIndices(kps, featsShape, originalShape=[320, 224], kernel=7):
 
     x, y = kps.copy()
 
@@ -41,8 +41,7 @@ def getNonNeighborhoodIndices(kps, featsShape, originalShape, kernel=7):
     return index_list
 
 
-def BilinearInterpolate(kps, correlationMap, originalShape):
-    # x: width, y:height
+def BilinearInterpolate(kps, correlationMap, originalShape=[320, 224]):
     x, y = kps.copy()
     h, w = correlationMap.shape[:2]
     correlationMap = correlationMap.view(h, w, -1)
@@ -74,7 +73,7 @@ def BilinearInterpolate(kps, correlationMap, originalShape):
         return xfloat * res1 + (1-xfloat)*res2
 
 
-def findNearestPoint(kps, featsShape, originalShape):
+def findNearestPoint(kps, featsShape, originalShape=[320, 224]):
 
     x, y = kps.copy()
     h, w = featsShape
@@ -95,13 +94,12 @@ def findNearestPoint(kps, featsShape, originalShape):
         return [min(w-1, xmin+1), min(h-1, ymin+1)]
 
 
-def getBlurredGT(kps, featsShape, originalShape):
+def getBlurredGT(kps, featsShape, originalShape=[320, 224]):
     x, y = kps.copy()
     h, w = featsShape
 
     x *= w/float(originalShape[0])
     y *= h/float(originalShape[1])
-
     xfloat, xmin = math.modf(x)
     yfloat, ymin = math.modf(y)
     xmin = int(xmin)
@@ -146,13 +144,12 @@ def getBlurredGT(kps, featsShape, originalShape):
     return map2D.view(-1)
 
 
-def predict_kps(src_kps, confidence_ts, originalShape):
+def predict_kps(src_kps, confidence_ts, originalShape=[224, 320]):
     r"""Transfer keypoints by nearest-neighbour assignment"""
 
     src_kps = src_kps.cpu().detach().numpy()
     #trg_kps = trg_kps.cpu().detach().numpy()
     h, w = confidence_ts.shape[:2]
-
     confidence_ts_tmp = confidence_ts.view(h, w, -1)
     _, trg_argmax_idx = torch.max(confidence_ts_tmp, dim=2)
 
@@ -162,19 +159,18 @@ def predict_kps(src_kps, confidence_ts, originalShape):
     pred_kps_y = []
 
     for i in range(len(src_kps[0])):
-        x, y = findNearestPoint(
-            [src_kps[0, i], src_kps[1, i]], featsShape, originalShape=originalShape)
+        x, y = findNearestPoint([src_kps[0, i], src_kps[1, i]], featsShape)
 
         map_bilinear = BilinearInterpolate(
-            [src_kps[0, i], src_kps[1, i]], confidence_ts, originalShape=originalShape).unsqueeze(0)
+            [src_kps[0, i], src_kps[1, i]], confidence_ts).unsqueeze(0)
 
         _, pred = torch.max(map_bilinear, dim=1)
 
         pred_x = int(pred % w)
         pred_y = int(pred / w)
 
-        pred_x *= originalShape[0]/w
-        pred_y *= originalShape[1]/h
+        pred_x *= originalShape[1]/w
+        pred_y *= originalShape[0]/h
 
         pred_kps_x.append(pred_x)
         pred_kps_y.append(pred_y)

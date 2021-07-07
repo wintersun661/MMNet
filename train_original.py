@@ -14,13 +14,13 @@ from data import PascalDataset as Dataset
 #from utils import visualizer
 
 from models import Loss, Optimizer
-from models import Model as Model
+from models import MMNet_original as Model
 
 from utils import geometry, visualizer
 from evaluation_tools import evaluation
 
 
-def fix_random_seed(seed=121):
+def fix_random_seed(seed=1):
     torch.manual_seed(seed)
     torch.cuda.manual_seed(seed)
     np.random.seed(seed)
@@ -70,7 +70,6 @@ def validation_res(cur_model, epoch_no, opt, logger, target_shape, alpha=0.1):
         val_dataset, batch_size=opt.batch, shuffle=True, num_workers=0)
 
     cur_model.eval()
-    cur_model.backbone.eval()
 
     pck_list = []
 
@@ -124,7 +123,6 @@ def train(logger, opt):
         opt.benchmark, opt.data_path, opt.thresh_type, "trn", device, opt.resize, opt.max_kps_num)
     trn_generator = torch.utils.data.DataLoader(
         trn_dataset, batch_size=batch_size, shuffle=False, num_workers=0)
-    trn_size = len(trn_generator)
 
     # model initialization
     model = Model.MMNet(opt).to(device)
@@ -137,15 +135,14 @@ def train(logger, opt):
 
     # begin training, iterate over epoch nums
     for epoch in range(epoch_num):
-        model.train()
-        model.backbone.train()
+
         running_loss = 0.0
 
         for i, data in enumerate(trn_generator):
             cur_batchsize = len(data['src_imname'])
             pred = model(data)
-            loss = 0
 
+            loss = 0
             for k in range(len(pred)):
                 loss += cross_entropy_loss2d(criterion, pred[k][0], data['src_kps'],
                                              data['trg_kps'], data['valid_kps_num'], target_shape)/cur_batchsize
@@ -160,12 +157,9 @@ def train(logger, opt):
 
             running_loss += loss.item()
 
-            if epoch*trn_size+i % opt.step_size == 0:
-                Optimizer.adjust_learning_rate(optim, opt.gamma, logger)
-
-            if (i+1) % 50 == 0:
+            if (i+1) % 20 == 0:
                 logger.info("[%d, %5d] loss: %.3f" %
-                            (epoch+1, i+1, running_loss/50))
+                            (epoch+1, i+1, running_loss/20))
                 visualizer.visualize_pred(
                     data, pred, suffix=str(epoch), idx=str(i), visualization_path=os.path.join(ckp_path, opt.visualization_path))
 

@@ -9,6 +9,7 @@ import torch
 
 class Evaluator:
     r"""To evaluate and log evaluation metrics: PCK, LT-ACC, IoU"""
+
     def __init__(self, benchmark, device):
         r"""Constructor for Evaluator"""
         self.eval_buf = {
@@ -41,18 +42,21 @@ class Evaluator:
         self.benchmark = benchmark
         self.device = device
 
-    def evaluate(self, prd_kps, data,idx):
+    def evaluate(self, prd_kps, data, idx):
         r"""Compute desired evaluation metric"""
-        return self.eval_funct(prd_kps, data,idx)
+        return self.eval_funct(prd_kps, data, idx)
 
-    def log_result(self, idx, data,i, average=False):
+    def log_result(self, idx, data, i, average=False):
         r"""Print results: PCK, or LT-ACC & IoU """
-        return self.log_funct(idx, data, i,average)
+        return self.log_funct(idx, data, i, average)
 
-    def eval_pck(self, prd_kps, data,idx):
+    def eval_pck(self, prd_kps, data, idx):
         r"""Compute percentage of correct key-points (PCK) based on prediction"""
-        pckthres = data['pckthres'][idx] 
-        ncorrt = correct_kps(data['trg_kps'][idx][:,:data['effective_kps_num'][idx]].cuda(), prd_kps, pckthres, data['alpha'])
+        pckthres = data['pckthres'][idx]
+        ncorrt = correct_kps(data['trg_kps'][idx][:, :data['effective_kps_num'][idx]].cuda(
+        ), prd_kps, pckthres, data['alpha'])
+        print(ncorrt)
+        exit()
         pair_pck = int(ncorrt) / int(data['effective_kps_num'][idx])
 
         self.eval_buf['pck'].append(pair_pck)
@@ -63,12 +67,13 @@ class Evaluator:
 
         return pair_pck
 
-    def log_pck(self, idx, data, i,average):
+    def log_pck(self, idx, data, i, average):
         r"""Log percentage of correct key-points (PCK)"""
         if average:
             pck = sum(self.eval_buf['pck']) / len(self.eval_buf['pck'])
             for cls in self.eval_buf['cls_pck']:
-                cls_avg = sum(self.eval_buf['cls_pck'][cls]) / len(self.eval_buf['cls_pck'][cls])
+                cls_avg = sum(self.eval_buf['cls_pck'][cls]) / \
+                    len(self.eval_buf['cls_pck'][cls])
                 logging.info('%15s: %3.3f' % (cls, cls_avg))
             logging.info(' * Average: %3.3f' % pck)
 
@@ -82,13 +87,12 @@ class Evaluator:
                       data['pair_class'][i]))
         return None
 
+
 def correct_kps(trg_kps, prd_kps, pckthres, alpha=0.1):
     r"""Compute the number of correctly transferred key-points"""
-    
+
     l2dist = torch.pow(torch.sum(torch.pow(trg_kps - prd_kps, 2), 0), 0.5)
     thres = pckthres.expand_as(l2dist).float()
     correct_pts = torch.le(l2dist, thres * alpha)
 
     return torch.sum(correct_pts)
-
-

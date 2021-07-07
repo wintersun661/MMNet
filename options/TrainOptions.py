@@ -21,6 +21,8 @@ class OptionParser(BaseOptions.OptionParser):
         self.parser.add_argument('--lr', type=float, default=1e-3)
         self.parser.add_argument('--weight_decay', type=float, default=0.999)
         self.parser.add_argument('--momentum', type=float, default=0.9)
+        self.parser.add_argument('--step_size', type=int, default=10000)
+        self.parser.add_argument('--gamma', type=float, default=0.1)
 
         # loss
         self.parser.add_argument('--loss_type', type=str, default="BCE")
