@@ -128,6 +128,7 @@ def train(logger, opt):
 
     # model initialization
     model = Model.MMNet(opt).to(device)
+    model.train()
 
     # set loss and optimizer
     criterion = Loss.createLoss(opt)
@@ -145,6 +146,7 @@ def train(logger, opt):
             cur_batchsize = len(data['src_imname'])
             pred = model(data)
             loss = 0
+            optim.zero_grad()
 
             for k in range(len(pred)):
                 loss += cross_entropy_loss2d(criterion, pred[k][0], data['src_kps'],
@@ -153,14 +155,12 @@ def train(logger, opt):
                                              data['src_kps'], data['valid_kps_num'], target_shape)/cur_batchsize
 
             # back propagation
-            optim.zero_grad()
-
             loss.backward()
             optim.step()
 
             running_loss += loss.item()
 
-            if epoch*trn_size+i % opt.step_size == 0:
+            if epoch*trn_size+i+1 % opt.step_size == 0:
                 Optimizer.adjust_learning_rate(optim, opt.gamma, logger)
 
             if (i+1) % 50 == 0:

@@ -16,7 +16,7 @@ from data import PascalDataset as Dataset
 # from utils import visualizer
 
 from models import Loss, Optimizer
-from models import Model as Model
+from models import MMNet_original as Model
 
 from utils import geometry as geometry
 from evaluation_tools import evaluation
@@ -46,7 +46,8 @@ def test(logger, opt):
     ckp_fullname = os.path.join(ckp_path, ckp_name)
 
     print(ckp_fullname)
-    #ckp_fullname = "/home/zysong/SC_BDCN/F_r101_pascal_21/2021-03-13_11:03_best"
+    #ckp_fullname = "/home/zysong/SC_BDCN/F_r101_pascal_21/2021-03-13_11:03_18.pth.tar"
+    ckp_fullname = "/home/dyzhao/projects/SC_BDCN/ckp_res101_0001_ab21/2021-07-07_15:41_3.pth.tar"
 
     if not os.path.isfile(ckp_fullname):
         logger.error("Null checkpoint file!")
@@ -105,8 +106,8 @@ def test(logger, opt):
                          pair_pck,
                          sum(pck_list) / (i*batch_size+k+1),
                          data['pair_class'][k]))
-            visualizer.visualize_pred(
-                data, pred, suffix="", idx=str(i), visualization_path=os.path.join(ckp_path, opt.visualization_path, 'test'))
+            # visualizer.visualize_pred(
+            #     data, pred, suffix="", idx=str(i), visualization_path=os.path.join(ckp_path, opt.visualization_path, 'test'))
 
 
 if __name__ == "__main__":
