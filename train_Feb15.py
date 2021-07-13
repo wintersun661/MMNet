@@ -8,16 +8,18 @@ from torch.utils.data import DataLoader
 import argparse
 import time
 
-from logger.BaseLogger import Logger
 import re
 import random
 import os
 import sys
 import math
-from model import MMNet_original as BDCN_ab
-from utils import visualizer, geometry, evaluation
-from data import dataset, download
+from models import MMNet_original as Model
+from utils import visualizer, geometry
+from data import PascalDataset as Dataset
 import datetime
+from logger import BaseLogger as Logger
+
+import logging as log
 import cv2
 
 
@@ -32,6 +34,7 @@ def setup_seed(seed):
 
 def adjust_learning_rate(optimizer, steps, step_size, gamma=0.1, logger=None):
     """Sets the learning rate to the initial LR decayed by 10 every 30 epochs"""
+
     for param_group in optimizer.param_groups:
         param_group['lr'] = param_group['lr'] * gamma
         if logger:
@@ -44,7 +47,7 @@ def buildOneHot(index, featsShape):
     return res
 
 
-def cross_entropy_loss2d(loss_func, inputs, kps_src_list, kps_trg_list, effect_num_list, cuda=True):
+def cross_entropy_loss2d(loss_func, inputs, kps_src_list, kps_trg_list, effect_num_list, originalShape, cuda=True):
     # loss
     """
     :param inputs: inputs is a 5 dimensional data nx(h,w)x(h,W)
@@ -66,9 +69,9 @@ def cross_entropy_loss2d(loss_func, inputs, kps_src_list, kps_trg_list, effect_n
         for j in range(0, effect_num_list[i]):
 
             weights[j] = geometry.BilinearInterpolate(
-                [kps_src[0, j], kps_src[1, j]], inputs[i])
+                [kps_src[0, j], kps_src[1, j]], inputs[i], originalShape)
             targets[j] = geometry.getBlurredGT(
-                [kps_trg[0, j], kps_trg[1, j]], featsShape)
+                [kps_trg[0, j], kps_trg[1, j]], featsShape, originalShape)
 
         # print(loss_func(F.softmax(weights),targets))
         loss += loss_func(F.softmax(weights), targets)
@@ -114,35 +117,36 @@ def cross_entropy_loss2d_onehot(loss_func, inputs, kps_src_list, kps_trg_list, e
     return loss
 
 
-def train(model, args, logger):
+def train(model, args):
     datapath = args.datapath
     benchmark = args.dataset
+    height, width = args.resize.split(',')
+    target_shape = [int(width), int(height)]
+    ckp_path = args.ckp_path
     thres = args.thres
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-    log_interval = 50
-    best_avePCK = float("-inf")
+    log_interval = args.log_interval
+    best_val_loss = float("inf")
     cur_time = datetime.datetime.now().strftime("%Y-%m-%d_%H:%M")
-    #loss_func = nn.CrossEntropyLoss(reduction='mean')
-    evaluator = evaluation.Evaluator(benchmark, device)
+    # loss_func = nn.CrossEntropyLoss(reduction='mean')
     loss_func = nn.BCELoss(size_average=False)
 
     # trainning data benchmark initialization
     setup_seed(1)
-    download.download_dataset(os.path.abspath(datapath), benchmark)
-    trainDset = download.load_dataset(
-        benchmark, datapath, thres, device, 'trn', '')
+
+    trainDset = Dataset.CorrespondenceDataset(
+        'pfpascal', args.datapath, args.thres, "trn", device, args.resize, 50)
     trainDataloader = DataLoader(
         trainDset, batch_size=5, num_workers=0, shuffle=True)
-    valDset = download.load_dataset(
-        benchmark, datapath, thres, device, 'val', '')
+    valDset = Dataset.CorrespondenceDataset(
+        'pfpascal', args.datapath, args.thres, "val", device, args.resize, 50)
     valDataloader = DataLoader(
         valDset, batch_size=5, num_workers=0)
 
     params_dict = dict(model.named_parameters())
     base_lr = args.base_lr
     weight_decay = args.weight_decay
-
-    alpha = args.alpha
+    logger = args.logger
     params = []
 
     for key, v in params_dict.items():
@@ -201,8 +205,6 @@ def train(model, args, logger):
 
     optimizer = torch.optim.SGD(params, momentum=args.momentum,
                                 lr=args.base_lr, weight_decay=args.weight_decay)
-    # optimizer = torch.optim.Adam(params, lr=0.001, betas=(
-    #     0.9, 0.999), eps=1e-08, weight_decay=0, amsgrad=False)
 
     start_step = 1
     mean_loss = []
@@ -233,81 +235,75 @@ def train(model, args, logger):
     for step in range(start_step, max_iter + 1):
         optimizer.zero_grad()
         batch_loss = 0
+        for i in range(args.iter_size):
+            if cur == iter_per_epoch:
+                cur = 0
+                epoch_loss /= len(trainDataloader)
+                print('TRAIN set: Average loss: {:.4f}'.format(epoch_loss))
+                epoch_loss = 0
+                if not os.path.isdir(ckp_path):
+                    os.mkdirs(ckp_path)
+                torch.save(model.state_dict(), os.path.join(ckp_path, cur_time +
+                                                            '_'+str(int(step/iter_per_epoch))+'.pth.tar'))
+                for idx, data in enumerate(valDataloader):
+                    tic_val = time.time()
+                    # epoch_loss = 0.
+                    with torch.no_grad():
 
-        if cur == iter_per_epoch:
-            cur = 0
-            epoch_loss /= len(trainDataloader)
-            logger.info('TRAIN set: Average loss: {:.4f}'.format(epoch_loss))
-            epoch_loss = 0
-            torch.save(model.state_dict(), 'checkpoints/'+cur_time +
-                       '_'+str(int(step/iter_per_epoch))+'.pth.tar')
-            model.backbone.eval()
-            PCK_list = []
-            for idx, data in enumerate(valDataloader):
-                tic_val = time.time()
-                data['alpha'] = alpha
-                #epoch_loss = 0.
-                with torch.no_grad():
+                        out = model(data)
 
-                    out = model(data)
+                        curBatchSize = len(data['src_img'])
 
-                    curBatchSize = len(data['src_img'])
+                        loss = 0
+                        for k in range(4):
 
-                    for i in range(len(data['src_kps'])):
-                        tic = time.time()
-                        prd_kps = geometry.predict_kps(
-                            data['src_kps'][i][:, :data['effective_kps_num'][i]], out[args.resolution][0][i])
-                        prd_kps = torch.from_numpy(
-                            np.array(prd_kps)).to(device)
-                        toc = time.time()
+                            loss += cross_entropy_loss2d(
+                                loss_func, out[k][0], data['src_kps'], data['trg_kps'], data['valid_kps_num'], target_shape)/curBatchSize
+                            loss += cross_entropy_loss2d(
+                                loss_func, out[k][1], data['trg_kps'], data['src_kps'], data['valid_kps_num'], target_shape)/curBatchSize
 
-                        pair_pck = evaluator.evaluate(prd_kps, data, i)
-                        PCK_list.append(pair_pck)
+                        loss_np = loss.data.cpu().numpy()
 
-            avePCK = sum(PCK_list)/len(PCK_list)
-            logger.info('VAL set: Average pck: {:.4f}'.format(avePCK))
-            is_best = avePCK > best_avePCK
-            best_avePCK = max(avePCK, best_avePCK)
-            if is_best:
-                torch.save(model.state_dict(),
-                           'checkpoints/'+cur_time+'_best')
-            model.backbone.train()
-            model.train()
+                        epoch_loss += loss_np
 
-        data_iter = iter(trainDataloader)
-        data = next(data_iter)
-        if args.cuda:
-            data = data.cuda()
-        out = model(data)
-        curBatchSize = len(data['src_img'])
+                epoch_loss /= len(valDataloader)
+                print('VAL set: Average loss: {:.4f}'.format(epoch_loss))
+                is_best = epoch_loss < best_val_loss
+                best_val_loss = min(epoch_loss, best_val_loss)
+                if is_best:
+                    torch.save(model.state_dict(),
+                               os.path.join(ckp_path, cur_time+'_best'))
 
-        loss = 0
-        for k in range(4):
+                data_iter = iter(trainDataloader)
+            data = next(data_iter)
+            if args.cuda:
+                data = data.cuda()
+            out = model(data)
+            curBatchSize = len(data['src_img'])
 
-            loss += cross_entropy_loss2d(loss_func, out[k][0], data['src_kps'],
-                                         data['trg_kps'], data['effective_kps_num'])/curBatchSize
-            loss += cross_entropy_loss2d(loss_func, out[k][1], data['trg_kps'],
-                                         data['src_kps'], data['effective_kps_num'])/curBatchSize
-            # print(loss)
+            loss = 0
+            for k in range(4):
+                loss += cross_entropy_loss2d(loss_func, out[k][0], data['src_kps'],
+                                             data['trg_kps'], data['valid_kps_num'], target_shape)/curBatchSize
+                loss += cross_entropy_loss2d(loss_func, out[k][1], data['trg_kps'],
+                                             data['src_kps'], data['valid_kps_num'], target_shape)/curBatchSize
 
-        torch.autograd.set_detect_anomaly(True)
-        loss.backward()
+            loss.backward()
+            # visualizer.visualizer_in_one(data,cur,out)
+            '''
+            for name, parms in model.named_parameters():
+                print('-->name:', name, '-->grad_requirs:',parms.requires_grad, \
+                ' -->grad_value:',parms.grad, ' -->weight:', parms.data)
+            '''
+            batch_loss += loss.cpu().data.numpy()
+            epoch_loss += batch_loss
+            if cur % log_interval == 0:
+                visualizer.visualize_pred(
+                    data, out, suffix=str(int(step/iter_per_epoch)), idx=str(i), visualization_path=os.path.join(ckp_path, args.visualizer))
 
-        # visualizer.visualizer_in_one(data,cur,out)
-        '''
-        for name, parms in model.named_parameters():	
-            print('-->name:', name, '-->grad_requirs:',parms.requires_grad, \
-            ' -->grad_value:',parms.grad, ' -->weight:', parms.data)
-        '''
-        batch_loss += loss.cpu().data.numpy()
-        epoch_loss += batch_loss
-        if cur % log_interval == 0:
-            visualizer.visualizer_in_one(
-                data, cur, out, save_path=args.visualizer)
-
-            logger.info('TRAIN Epoch: {} [{}/{} ({:.0f}%)]\t\tLoss: {:.6f}'.format(int(
-                step/iter_per_epoch), cur, iter_per_epoch, 100. * cur / len(trainDataloader), batch_loss))
-        cur += 1
+                logger.info('TRAIN Epoch: {} [{}/{} ({:.0f}%)]\t\tLoss: {:.6f}'.format(int(
+                    step/iter_per_epoch), cur, iter_per_epoch, 100. * cur / len(trainDataloader), batch_loss))
+            cur += 1
         # update parameter
         optimizer.step()
         if len(mean_loss) < args.average_loss:
@@ -317,62 +313,27 @@ def train(model, args, logger):
             pos = (pos + 1) % args.average_loss
         if step % args.step_size == 0:
             adjust_learning_rate(optimizer, step, args.step_size, args.gamma)
-        # if step % args.snapshots == 0:
-        #     torch.save(model.state_dict(), '%s/bdcn_%d.pth' %
-        #                (args.param_dir, step))
-        #     state = {'step': step+1, 'param': model.state_dict(),
-        #              'solver': optimizer.state_dict()}
+        if step % args.snapshots == 0:
+            torch.save(model.state_dict(), '%s/bdcn_%d.pth' %
+                       (args.param_dir, step))
+            state = {'step': step+1, 'param': model.state_dict(),
+                     'solver': optimizer.state_dict()}
             torch.save(state, '%s/bdcn_%d.pth.tar' % (args.param_dir, step))
-        if step % 300 == 0:
+        if step % args.display == 0:
             tm = time.time() - start_time
             logger.info('iter: %d, lr: %e, loss: %f, time using: %f(%fs/iter)' % (step,
                                                                                   optimizer.param_groups[0]['lr'], np.mean(mean_loss), tm, tm/args.display))
             start_time = time.time()
 
-    epoch_loss /= len(trainDataloader)
-    logger.info('TRAIN set: Average loss: {:.4f}'.format(epoch_loss))
-    epoch_loss = 0
-    torch.save(model.state_dict(), 'checkpoints/'+cur_time +
-               '_'+str(int(max_iter/iter_per_epoch))+'.pth.tar')
-    PCK_list = []
-    model.backbone.eval()
-    for idx, data in enumerate(valDataloader):
-        tic_val = time.time()
-        data['alpha'] = alpha
-        #epoch_loss = 0.
-        with torch.no_grad():
-
-            out = model(data)
-
-            curBatchSize = len(data['src_img'])
-
-            for i in range(len(data['src_kps'])):
-                tic = time.time()
-                prd_kps = geometry.predict_kps(
-                    data['src_kps'][i][:, :data['effective_kps_num'][i]], out[args.resolution][0][i])
-                prd_kps = torch.from_numpy(np.array(prd_kps)).to(device)
-                toc = time.time()
-
-                pair_pck = evaluator.evaluate(prd_kps, data, i)
-                PCK_list.append(pair_pck)
-
-    avePCK = sum(PCK_list)/len(PCK_list)
-    logger.info('VAL set: Average pck: {:.4f}'.format(avePCK))
-    is_best = avePCK < best_avePCK
-    best_avePCK = min(avePCK, best_avePCK)
-    if is_best:
-        torch.save(model.state_dict(),
-                   'checkpoints/'+cur_time+'_best')
-
 
 def main():
     args = parse_args()
-    logger = Logger(file_path='./logs_original_train',
-                    time_stamp=True, suffix="train").createLogger()
 
-    handler = log.FileHandler(args.log)
+    logger = Logger.Logger(file_path=args.ckp_path,
+                           time_stamp=True, suffix="train").createLogger()
 
-    logger.handlers.append(handler)
+    args.logger = logger
+
     logger.info('*'*80)
     logger.info('the args are the below')
     logger.info('*'*80)
@@ -386,17 +347,18 @@ def main():
         os.mkdir(args.param_dir)
     torch.manual_seed(time.time())
 
-    model = BDCN_ab.BDCN().to(device)
+    model = Model.MMNet().to(device)
     if args.complete_pretrain:
         model.load_state_dict(torch.load(args.complete_pretrain))
     logger.info(model)
-    train(model, args, logger)
+    train(model, args)
 
 
 def parse_args():
     parser = argparse.ArgumentParser(
         description='Train BDCN for different args')
-    parser.add_argument('--datapath', type=str, default='./Datasets_SCOT')
+    parser.add_argument('--datapath', type=str,
+                        default='../MMNet_Feb_15/Datasets_SCOT')
     parser.add_argument('-d', '--dataset', type=str,
                         default='pfpascal', help='The dataset to train')
     parser.add_argument('--param-dir', type=str, default='params',
@@ -455,10 +417,8 @@ def parse_args():
                         help='the log interval,default = 10')
     parser.add_argument('--visualizer', type=str,
                         default='visualized_training_')
-    parser.add_argument('--width', type=int, default=320)
-    parser.add_argument('--height', type=int, default=224)
-    parser.add_argument('--resolution', type=int, default=3)
-    parser.add_argument('--alpha', type=float, default=0.1)
+    parser.add_argument('--ckp_path', type=str, default="ckp_train_feb_15")
+    parser.add_argument('--resize', type=str, default="224,320")
     return parser.parse_args()
 
 

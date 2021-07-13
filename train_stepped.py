@@ -14,7 +14,7 @@ from data import PascalDataset as Dataset
 #from utils import visualizer
 
 from models import Loss, Optimizer
-from models import Model as Model
+from models import MMNet_original as Model
 
 from utils import geometry, visualizer
 from evaluation_tools import evaluation
@@ -58,6 +58,7 @@ def cross_entropy_loss2d(loss_func, inputs, kps_src_list, kps_trg_list, effect_n
         loss += loss_func(F.softmax(weights), targets)
 
     return loss
+
 
 def adjust_learning_rate(optimizer, gamma=0.1, logger=None):
     """Sets the learning rate to the initial LR decayed by 10 every 30 epochs"""
@@ -131,8 +132,9 @@ def train(logger, opt):
     trn_dataset = Dataset.CorrespondenceDataset(
         opt.benchmark, opt.data_path, opt.thresh_type, "trn", device, opt.resize, opt.max_kps_num)
     trn_generator = torch.utils.data.DataLoader(
-        trn_dataset, batch_size=batch_size, shuffle=False, num_workers=0)
+        trn_dataset, batch_size=batch_size, shuffle=True, num_workers=0)
     trn_size = len(trn_generator)
+    data_iter = iter(trn_generator)
 
     # model initialization
     model = Model.MMNet(opt).to(device)
@@ -141,52 +143,61 @@ def train(logger, opt):
     # set loss and optimizer
     criterion = Loss.createLoss(opt)
     optim = Optimizer.createOptimizer(opt, model)
+    max_iter = opt.epoch * len(trn_generator)
 
+    step = 1
+    cur = 0
     max_pck = 0.0
-
+    running_loss = 0.0
     # begin training, iterate over epoch nums
-    for epoch in range(epoch_num):
+    for step in range(1, max_iter + 1):
+        epoch = step / len(trn_generator)
         model.train()
-        #model.backbone.train()
-        running_loss = 0.0
+        model.backbone.train()
 
-        for i, data in enumerate(trn_generator):
-            cur_batchsize = len(data['src_imname'])
-            pred = model(data)
-            loss = 0
-            optim.zero_grad()
+        data = next(data_iter)
+        cur_batchsize = len(data['src_imname'])
+        pred = model(data)
+        loss = 0
+        optim.zero_grad()
 
-            for k in range(len(pred)):
-                loss += cross_entropy_loss2d(criterion, pred[k][0], data['src_kps'],
-                                             data['trg_kps'], data['valid_kps_num'], target_shape)/cur_batchsize
-                loss += cross_entropy_loss2d(criterion, pred[k][1], data['trg_kps'],
-                                             data['src_kps'], data['valid_kps_num'], target_shape)/cur_batchsize
+        for k in range(len(pred)):
+            loss += cross_entropy_loss2d(criterion, pred[k][0], data['src_kps'],
+                                         data['trg_kps'], data['valid_kps_num'], target_shape)/cur_batchsize
+            loss += cross_entropy_loss2d(criterion, pred[k][1], data['trg_kps'],
+                                         data['src_kps'], data['valid_kps_num'], target_shape)/cur_batchsize
 
-            # back propagation
-            loss.backward()
-            optim.step()
+        # back propagation
+        loss.backward()
+        optim.step()
 
-            running_loss += loss.item()
+        running_loss += loss.item()
 
-            if epoch*trn_size+i+1 % opt.step_size == 0:
-                Optimizer.adjust_learning_rate(optim, opt.gamma, logger)
+        cur += 1
+        if step % opt.step_size == 0:
+            Optimizer.adjust_learning_rate(optim, opt.gamma, logger)
 
-            if (i+1) % 50 == 0:
-                logger.info("[%d, %5d] loss: %.3f" %
-                            (epoch+1, i+1, running_loss/50))
-                visualizer.visualize_pred(
-                    data, pred, suffix=str(epoch), idx=str(i), visualization_path=os.path.join(ckp_path, opt.visualization_path))
+        if step % 50 == 0:
+            logger.info("[%d, %5d] loss: %.3f" %
+                        (epoch+1, cur+1, running_loss/50))
+            visualizer.visualize_pred(
+                data, pred, suffix=str(int(epoch)), idx=str(cur), visualization_path=os.path.join(ckp_path, opt.visualization_path))
 
-                running_loss = 0.0
-        logger.info('saving %dth ckp in %s.' % (epoch, ckp_path))
-        torch.save(model.state_dict(), os.path.join(
-            ckp_path, str(epoch)+".pth"))
-        res = validation_res(model, epoch, opt, logger, target_shape)
-        if res > max_pck:
-            logger.info('saving %dth ckp as best in %s.' % (epoch, ckp_path))
+            running_loss = 0.0
+        if cur == len(trn_generator):
+            cur = 0
+            # valid
+            data_iter = iter(trn_generator)
+            logger.info('saving %dth ckp in %s.' % (epoch, ckp_path))
             torch.save(model.state_dict(), os.path.join(
-                ckp_path, "best.pth"))
-            max_pck = res
+                ckp_path, str(epoch)+".pth"))
+            res = validation_res(model, epoch, opt, logger, target_shape)
+            if res > max_pck:
+                logger.info('saving %dth ckp as best in %s.' %
+                            (epoch, ckp_path))
+                torch.save(model.state_dict(), os.path.join(
+                    ckp_path, "best.pth"))
+                max_pck = res
 
 
 if __name__ == "__main__":

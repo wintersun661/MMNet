@@ -45,10 +45,18 @@ def test(logger, opt):
 
     ckp_fullname = os.path.join(ckp_path, ckp_name)
 
+    #ckp_fullname = "../MMNet_Feb_15/ckp_train_feb_15/2021-07-09_18:47_18.pth.tar"
+    #ckp_fullname = "ckp_mmnet_feb15_only_dataset_changed/2021-07-09_20:23_17.pth.tar"
+    #ckp_fullname = "checkpoints/2021-07-09_20:23_best"
+    #ckp_fullname = "ckp_mmnet_feb15_only_dataset_changed_old_model_0001/2021-07-12_10:55_best"
+    #ckp_fullname = "ckp_mmnet_feb15_only_dataset_changed_old_model_0001/2021-07-12_10:55_18.pth.tar"
+    ckp_fullname = "ckp_train_feb_15_original_model_0001/2021-07-12_20:44_best"
     print(ckp_fullname)
-    #ckp_fullname = "/home/zysong/SC_BDCN/F_r101_pascal_21/2021-03-13_11:03_18.pth.tar"
-    ckp_fullname = "/home/dyzhao/projects/SC_BDCN/ckp_res101_0001_ab21/2021-07-07_15:41_3.pth.tar"
-
+    #ckp_fullname = "/home/zysong/SC_BDCN/F_r101_pascal_21/2021-03-13_11:03_best"
+    #ckp_fullname = "/home/zysong/SC_BDCN/ckp_re_res101/2021-07-05_17:08_best"
+    #ckp_fullname = "/home/zysong/SC_BDCN/ckp_nonlocal_r101_pascal/2021-03-08_18:40_best"
+    #ckp_fullname = "../MMNet_Feb_15/ckp_feb15_0005/2021-07-09_19:38_18.pth.tar"
+    logger.info('ckp file: % s' % ckp_fullname)
     if not os.path.isfile(ckp_fullname):
         logger.error("Null checkpoint file!")
         exit()
@@ -115,7 +123,7 @@ if __name__ == "__main__":
 
     options = Options.OptionParser().parse()
     logger = Logger.Logger(file_path=options.checkpoint_path,
-                           time_stamp=True, suffix="train").createLogger()
+                           time_stamp=True, suffix="test").createLogger()
     args = vars(options)
     logger.info("Options listed below:----------------")
     for k, v in args.items():

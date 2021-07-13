@@ -4,3 +4,4 @@ ckp_*/*
 visualizations/*
 *.pyc
 debug_*/*
+params*/*

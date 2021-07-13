@@ -1,7 +1,6 @@
 import numpy as np
 import torch
 import torch.nn as nn
-from torch.nn.modules import padding
 
 from . import resnet
 from functools import reduce
@@ -11,6 +10,30 @@ from torchvision import models
 import torch.nn.functional as F
 
 import gluoncvth as gcv
+
+
+def crop(data1, data2, crop_h, crop_w):
+    _, _, h1, w1 = data1.size()
+    _, _, h2, w2 = data2.size()
+    assert(h2 <= h1 and w2 <= w1)
+    data = data1[:, :, crop_h:crop_h+h2, crop_w:crop_w+w2]
+    return data
+
+
+def get_upsampling_weight(in_channels, out_channels, kernel_size):
+    """Make a 2D bilinear kernel suitable for upsampling"""
+    factor = (kernel_size + 1) // 2
+    if kernel_size % 2 == 1:
+        center = factor - 1
+    else:
+        center = factor - 0.5
+    og = np.ogrid[:kernel_size, :kernel_size]
+    filt = (1 - abs(og[0] - center) / factor) * \
+           (1 - abs(og[1] - center) / factor)
+    weight = np.zeros((in_channels, out_channels, kernel_size, kernel_size),
+                      dtype=np.float64)
+    weight[range(in_channels), range(out_channels), :, :] = filt
+    return torch.from_numpy(weight).float()
 
 
 class WeightAverage(nn.Module):
@@ -131,59 +154,133 @@ class MSBlock(nn.Module):
                     m.bias.data.zero_()
 
 
+class NonLocalMsBlock(nn.Module):
+    def __init__(self, c_in, rate=4, R=3):
+        super(NonLocalMsBlock, self).__init__()
+        self.ms_block = MSBlock(c_in, rate)
+        self.non_local_block = WeightAverage(c_in, R)
+
+    def forward(self, x):
+        return self.non_local_block(self.ms_block(x))
+
+
 class MMNet(nn.Module):
-    def __init__(self, opt=None, device='cuda:0'):
+    def __init__(self, opt=None, logger=None, rate=4, device='cuda:0', backbone_net_name='resnet101'):
         super(MMNet, self).__init__()
 
-        if opt == None:
-            self.backbone_name = 'resnet101'
-            rate = 4
-            inner_channel = 21
-        else:
-            self.backbone_name = opt.backbone_name
-            rate = opt.ms_rate
-            inner_channel = opt.feature_channel
+        #self.L2Norm1 = L2Norm(21, 20)
+        #self.L2Norm2 = L2Norm(21, 20)
+        #self.L2Norm3 = L2Norm(21, 20)
+        #self.L2Norm4 = L2Norm(21, 20)
+        #self.pretrain = pretrain
+        t = 1
+
+        self.backbone_net_name = backbone_net_name
 
         self.device = device
 
-        if self.backbone_name == 'resnet50':
+        if self.backbone_net_name == 'resnet50':
             self.backbone = resnet.resnet50(pretrained=True).to(device)
             self.nbottlenecks = [3, 4, 6, 3]
-            self.feature_channels = [256, 512, 1024, 2048]
 
-        elif self.backbone_name == 'resnet101':
+        elif self.backbone_net_name == 'resnet101':
             self.backbone = resnet.resnet101(pretrained=True).to(device)
             self.nbottlenecks = [3, 4, 23, 3]
-            self.feature_channels = [256, 512, 1024, 2048]
 
-        elif self.backbone_name == 'resnext-101':
+        elif self.backbone_net_name == 'resnext-101':
             self.backbone = resnet.resnext101_32x8d(pretrained=True).to(device)
             self.nbottlenecks = [3, 4, 23, 3]
-            self.feature_channels = [256, 512, 1024, 2048]
 
-        elif self.backbone_name == 'fcn-resnet101':
+        elif self.backbone_net_name == 'fcn-resnet101':
             self.backbone = gcv.models.get_fcn_resnet101_voc(
                 pretrained=True).to(device).pretrained
             self.nbottlenecks = [3, 4, 23, 3]
-            self.feature_channels = [256, 512, 1024, 2048]
+
+        #self.features = vgg16_c.VGG16_C(pretrain, logger)
+        # changed to fit resnet101
 
         self.features = self.getResNetFeature_List
 
-        for i, k in enumerate(self.nbottlenecks):
-            for j in range(k):
-                setattr(self, "msblock"+str(i+1)+"_"+str(j+1),
-                        MSBlock(self.feature_channels[i], rate))
-                setattr(self, "conv"+str(i+1)+"_"+str(j+1)+"_down",
-                        nn.Conv2d(32, inner_channel, (1, 1), stride=1))
-            setattr(self, "conv"+str(i+1)+"_kernel", nn.Conv2d(inner_channel,
-                                                               inner_channel, (3, 3), stride=1, padding=1))
-            if i != len(self.nbottlenecks)-1:
-                setattr(self, "conv"+str(i+1)+"_scale", nn.Conv2d(2 *
-                                                                  inner_channel, inner_channel, (3, 3), stride=1, padding=1))
-            if i != 0:
-                setattr(self, "feat_upsample_"+str(i+1), nn.ConvTranspose2d(
-                    inner_channel, inner_channel, 4, stride=2, padding=1, bias=False))
-            setattr(self, "wa_"+str(i+1), WeightAverage(inner_channel))
+        self.msblock0 = MSBlock(64, rate)
+        self.conv0_down = nn.Conv2d(32*t, 21, (1, 1), stride=1)
+        self.conv0_kernel = nn.Conv2d(21, 21, (3, 3), stride=1, padding=1)
+
+        self.msblock1_1 = MSBlock(256, rate)
+        self.msblock1_2 = MSBlock(256, rate)
+        self.msblock1_3 = MSBlock(256, rate)
+        self.conv1_1_down = nn.Conv2d(32*t, 21, (1, 1), stride=1)
+        self.conv1_2_down = nn.Conv2d(32*t, 21, (1, 1), stride=1)
+        self.conv1_3_down = nn.Conv2d(32*t, 21, (1, 1), stride=1)
+        self.conv1_kernel = nn.Conv2d(21, 21, (3, 3), stride=1, padding=1)
+        self.conv1_scale = nn.Conv2d(42, 21, (3, 3), stride=1, padding=1)
+
+        self.msblock2_1 = MSBlock(512, rate)
+        self.msblock2_2 = MSBlock(512, rate)
+        self.msblock2_3 = MSBlock(512, rate)
+        self.msblock2_4 = MSBlock(512, rate)
+        self.conv2_1_down = nn.Conv2d(32*t, 21, (1, 1), stride=1)
+        self.conv2_2_down = nn.Conv2d(32*t, 21, (1, 1), stride=1)
+        self.conv2_3_down = nn.Conv2d(32*t, 21, (1, 1), stride=1)
+        self.conv2_4_down = nn.Conv2d(32*t, 21, (1, 1), stride=1)
+        self.conv2_kernel = nn.Conv2d(21, 21, (3, 3), stride=1, padding=1)
+        self.conv2_scale = nn.Conv2d(42, 21, (3, 3), stride=1, padding=1)
+
+        self.msblock3_1 = MSBlock(1024, rate)
+        self.msblock3_2 = MSBlock(1024, rate)
+        self.msblock3_3 = MSBlock(1024, rate)
+        self.msblock3_4 = MSBlock(1024, rate)
+        self.msblock3_5 = MSBlock(1024, rate)
+        self.msblock3_6 = MSBlock(1024, rate)
+        self.msblock3_7 = MSBlock(1024, rate)
+        self.msblock3_8 = MSBlock(1024, rate)
+        self.msblock3_9 = MSBlock(1024, rate)
+        self.msblock3_10 = MSBlock(1024, rate)
+        self.msblock3_11 = MSBlock(1024, rate)
+        self.msblock3_12 = MSBlock(1024, rate)
+        self.msblock3_13 = MSBlock(1024, rate)
+        self.msblock3_14 = MSBlock(1024, rate)
+        self.msblock3_15 = MSBlock(1024, rate)
+        self.msblock3_16 = MSBlock(1024, rate)
+        self.msblock3_17 = MSBlock(1024, rate)
+        self.msblock3_18 = MSBlock(1024, rate)
+        self.msblock3_19 = MSBlock(1024, rate)
+        self.msblock3_20 = MSBlock(1024, rate)
+        self.msblock3_21 = MSBlock(1024, rate)
+        self.msblock3_22 = MSBlock(1024, rate)
+        self.msblock3_23 = MSBlock(1024, rate)
+        self.conv3_1_down = nn.Conv2d(32*t, 21, (1, 1), stride=1)
+        self.conv3_2_down = nn.Conv2d(32*t, 21, (1, 1), stride=1)
+        self.conv3_3_down = nn.Conv2d(32*t, 21, (1, 1), stride=1)
+        self.conv3_4_down = nn.Conv2d(32*t, 21, (1, 1), stride=1)
+        self.conv3_5_down = nn.Conv2d(32*t, 21, (1, 1), stride=1)
+        self.conv3_6_down = nn.Conv2d(32*t, 21, (1, 1), stride=1)
+        self.conv3_7_down = nn.Conv2d(32*t, 21, (1, 1), stride=1)
+        self.conv3_8_down = nn.Conv2d(32*t, 21, (1, 1), stride=1)
+        self.conv3_9_down = nn.Conv2d(32*t, 21, (1, 1), stride=1)
+        self.conv3_10_down = nn.Conv2d(32*t, 21, (1, 1), stride=1)
+        self.conv3_11_down = nn.Conv2d(32*t, 21, (1, 1), stride=1)
+        self.conv3_12_down = nn.Conv2d(32*t, 21, (1, 1), stride=1)
+        self.conv3_13_down = nn.Conv2d(32*t, 21, (1, 1), stride=1)
+        self.conv3_14_down = nn.Conv2d(32*t, 21, (1, 1), stride=1)
+        self.conv3_15_down = nn.Conv2d(32*t, 21, (1, 1), stride=1)
+        self.conv3_16_down = nn.Conv2d(32*t, 21, (1, 1), stride=1)
+        self.conv3_17_down = nn.Conv2d(32*t, 21, (1, 1), stride=1)
+        self.conv3_18_down = nn.Conv2d(32*t, 21, (1, 1), stride=1)
+        self.conv3_19_down = nn.Conv2d(32*t, 21, (1, 1), stride=1)
+        self.conv3_20_down = nn.Conv2d(32*t, 21, (1, 1), stride=1)
+        self.conv3_21_down = nn.Conv2d(32*t, 21, (1, 1), stride=1)
+        self.conv3_22_down = nn.Conv2d(32*t, 21, (1, 1), stride=1)
+        self.conv3_23_down = nn.Conv2d(32*t, 21, (1, 1), stride=1)
+        self.conv3_kernel = nn.Conv2d(21, 21, (3, 3), stride=1, padding=1)
+        self.conv3_scale = nn.Conv2d(42, 21, (3, 3), stride=1, padding=1)
+
+        self.msblock4_1 = MSBlock(2048, rate)
+        self.msblock4_2 = MSBlock(2048, rate)
+        self.msblock4_3 = MSBlock(2048, rate)
+        self.conv4_1_down = nn.Conv2d(32*t, 21, (1, 1), stride=1)
+        self.conv4_2_down = nn.Conv2d(32*t, 21, (1, 1), stride=1)
+        self.conv4_3_down = nn.Conv2d(32*t, 21, (1, 1), stride=1)
+        self.conv4_kernel = nn.Conv2d(21, 21, (3, 3), stride=1, padding=1)
 
         #self.upsample_2 = nn.ConvTranspose2d(4480, 17920, 4, stride=2, padding=1,bias=False)
         self.upsample_4 = nn.ConvTranspose2d(
@@ -200,15 +297,27 @@ class MMNet(nn.Module):
         self.feature_upsample_2 = nn.ConvTranspose2d(
             21, 21, 4, stride=2, padding=1, bias=False)
 
-        self.msblock0 = MSBlock(64, rate)
-        self.conv0_down = nn.Conv2d(32, 21, (1, 1), stride=1)
-        self.conv0_kernel = nn.Conv2d(21, 21, (3, 3), stride=1, padding=1)
+        #self.fuse = nn.Conv2d(17920, 4480, 1,  stride=1)
+        self.fuse = nn.Linear(4, 1)
+
+        # self._initialize_weights(logger)
+
+        # self.non_local_0 = WeightAverage(21)
+        self.non_local_1 = WeightAverage(21)
+        self.non_local_2 = WeightAverage(21)
+        self.non_local_3 = WeightAverage(21)
+        self.non_local_4 = WeightAverage(21)
+
+    def calLayer0(self, feats):
+        sum0 = self.conv0_down(self.msblock0(feats[0]))
+        # sum0 = self.non_local_0(sum0)
+        return sum0
 
     def calLayer1(self, feats):
         sum1 = self.conv1_1_down(self.msblock1_1(feats[1])) + \
             self.conv1_2_down(self.msblock1_2(feats[2])) + \
             self.conv1_3_down(self.msblock1_3(feats[3]))
-        sum1 = self.wa_1(sum1)
+        sum1 = self.non_local_1(sum1)
         return sum1
 
     def calLayer2(self, feats):
@@ -216,7 +325,7 @@ class MMNet(nn.Module):
             self.conv2_2_down(self.msblock2_2(feats[5])) +\
             self.conv2_3_down(self.msblock2_3(feats[6])) +\
             self.conv2_4_down(self.msblock2_4(feats[7]))
-        sum2 = self.wa_2(sum2)
+        sum2 = self.non_local_2(sum2)
         return sum2
 
     def _res50_calLayer3(self, feats):
@@ -226,7 +335,7 @@ class MMNet(nn.Module):
             self.conv3_4_down(self.msblock3_4(feats[11])) + \
             self.conv3_5_down(self.msblock3_5(feats[12])) + \
             self.conv3_6_down(self.msblock3_6(feats[13]))
-        sum3 = self.wa_3(sum3)
+        sum3 = self.non_local_3(sum3)
         return sum3
 
     def calLayer3(self, feats):
@@ -253,21 +362,21 @@ class MMNet(nn.Module):
             self.conv3_21_down(self.msblock3_21(feats[28])) + \
             self.conv3_22_down(self.msblock3_22(feats[29])) + \
             self.conv3_23_down(self.msblock3_23(feats[30]))
-        sum3 = self.wa_3(sum3)
+        sum3 = self.non_local_3(sum3)
         return sum3
 
     def _res50_calLayer4(self, feats):
         sum4 = self.conv4_1_down(self.msblock4_1(feats[14])) + \
             self.conv4_2_down(self.msblock4_2(feats[15])) + \
             self.conv4_3_down(self.msblock4_3(feats[16]))
-        sum4 = self.wa_4(sum4)
+        sum4 = self.non_local_4(sum4)
         return sum4
 
     def calLayer4(self, feats):
         sum4 = self.conv4_1_down(self.msblock4_1(feats[31])) + \
             self.conv4_2_down(self.msblock4_2(feats[32])) + \
             self.conv4_3_down(self.msblock4_3(feats[33]))
-        sum4 = self.wa_4(sum4)
+        sum4 = self.non_local_4(sum4)
         return sum4
 
     def getResNetFeature_List(self, img, device='cuda:0'):
@@ -324,6 +433,13 @@ class MMNet(nn.Module):
                 bid].relu.forward(feat)
             feats.append(feat.clone())
 
+        '''    
+        # Up-sample & concatenate features to construct a hyperimage
+        for idx, feat in enumerate(feats):
+            if idx != 0:
+                feats[idx] = F.interpolate(feat, tuple(feats[0].shape[2:]), None, 'bilinear', True)
+        '''
+
         return feats
 
     def upsample(self, corr4d, ratio=2):
@@ -351,10 +467,10 @@ class MMNet(nn.Module):
             features_src.append(i[:batch])
             features_trg.append(i[batch:])
 
-        if self.backbone_name in ["resnet101", "resnext-101", 'fcn-resnet101']:
+        if self.backbone_net_name in ["resnet101", "resnext-101", 'fcn-resnet101']:
             calLayer4 = self.calLayer4
             calLayer3 = self.calLayer3
-        elif self.backbone_name == "resnet50":
+        elif self.backbone_net_name == "resnet50":
             calLayer4 = self._res50_calLayer4
             calLayer3 = self._res50_calLayer3
         calLayer2 = self.calLayer2
@@ -367,12 +483,17 @@ class MMNet(nn.Module):
         # with shape: batchsize, 21, 7, 10
 
         # upsample features into higher resolution
-        sum4_src_upsamples = self.feat_upsample_4(sum4_src)
-        sum4_trg_upsamples = self.feat_upsample_4(sum4_trg)
+        sum4_src_upsamples = self.feature_upsample_4(sum4_src)
+        sum4_trg_upsamples = self.feature_upsample_4(sum4_trg)
         # with shape: batchsize, 21, 14, 20
 
+        res_shape = sum4_src.shape[2:]
         # A->B source to target
+        #corrMap4d_4_AB = torch.einsum('ijkl,ijmn->iklmn',[sum4_src, self.conv4_kernel(sum4_trg)])
         # B->A target to source
+        #corrMap4d_4_BA = torch.einsum('ijkl,ijmn->iklmn',[sum4_trg, self.conv4_kernel(sum4_src)])
+        # with shape: batchsize, 7, 10, 7, 10
+        # print(corrMap4d_4_AB.shape,corrMap4d_4_BA.shape)
         corrMap4d_4_AB = torch.einsum('ijkl,ijmn->iklmn', [sum4_src, sum4_trg])
         corrMap4d_4_BA = torch.einsum('ijkl,ijmn->iklmn', [sum4_trg, sum4_src])
         # reshape
@@ -396,9 +517,10 @@ class MMNet(nn.Module):
         #with shape: batchsize, 21, 14, 20
 
         # upsample to higher resolution
-        sum3_src_upsamples = self.feat_upsample_3(sum3_src)
-        sum3_trg_upsamples = self.feat_upsample_3(sum3_trg)
+        sum3_src_upsamples = self.feature_upsample_3(sum3_src)
+        sum3_trg_upsamples = self.feature_upsample_3(sum3_trg)
 
+        res_shape = sum3_src.shape[2:]
         # A->B source to target
         corrMap4d_3_AB = torch.einsum('ijkl,ijmn->iklmn', [sum3_src, sum3_trg])
         # B->A target to source
@@ -427,9 +549,10 @@ class MMNet(nn.Module):
         #with shape: batchsize, 21, 28, 40
 
         # upsample to higher resolution
-        sum2_src_upsamples = self.feat_upsample_2(sum2_src)
-        sum2_trg_upsamples = self.feat_upsample_2(sum2_trg)
+        sum2_src_upsamples = self.feature_upsample_2(sum2_src)
+        sum2_trg_upsamples = self.feature_upsample_2(sum2_trg)
 
+        res_shape = sum2_src.shape[2:]
         # A->B source to target
         corrMap4d_2_AB = torch.einsum('ijkl,ijmn->iklmn', [sum2_src, sum2_trg])
         # B->A target to source
@@ -457,6 +580,7 @@ class MMNet(nn.Module):
         sum1_trg = self.conv1_scale(sum1_trg)
         #with shape: batchsize, 21, 56, 80
 
+        res_shape = sum1_src.shape[2:]
         # A->B source to target
         corrMap4d_1_AB = torch.einsum('ijkl,ijmn->iklmn', [sum1_src, sum1_trg])
         # B->A target to source
@@ -465,6 +589,9 @@ class MMNet(nn.Module):
 
         corrMap4d_1_AB = corrMap4d_1_AB + pred2_AB_upsampled.detach()
         corrMap4d_1_BA = corrMap4d_1_BA + pred2_BA_upsampled.detach()
+
+        # fuse
+        # difference between layers
 
         return [[corrMap4d_4_AB, corrMap4d_4_BA], [corrMap4d_3_AB, corrMap4d_3_BA], [corrMap4d_2_AB, corrMap4d_2_BA], [corrMap4d_1_AB, corrMap4d_1_BA]]
 
