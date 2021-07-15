@@ -26,3 +26,11 @@ class OptionParser(BaseOptions.OptionParser):
 
         # loss
         self.parser.add_argument('--loss_type', type=str, default="BCE")
+
+        # display
+        self.parser.add_argument('--log_interval', type=int, default=50)
+
+        # validation settings
+        self.parser.add_argument('--val_alpha', type=float, default=0.05)
+        self.parser.add_argument('--val_resolution', type=int, default=2)
+        self.parser.add_argument('--val_batch', type=int, default=5)

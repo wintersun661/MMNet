@@ -1,4 +1,4 @@
-logs/*
+logs*/*
 checkpoints*/*
 ckp_*/*
 visualizations/*

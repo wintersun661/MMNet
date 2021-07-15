@@ -69,46 +69,6 @@ def adjust_learning_rate(optimizer, gamma=0.1, logger=None):
             logger.info('%s: %s' % (param_group['name'], param_group['lr']))
 
 
-def validation_res(cur_model, epoch_no, opt, logger, target_shape, alpha=0.1):
-    resolution = 2
-    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-    batch_size = opt.batch
-    val_dataset = Dataset.CorrespondenceDataset(
-        opt.benchmark, opt.data_path, opt.thresh_type, "val", device, opt.resize, opt.max_kps_num)
-    val_generator = torch.utils.data.DataLoader(
-        val_dataset, batch_size=opt.batch, shuffle=True, num_workers=0)
-
-    cur_model.eval()
-    cur_model.backbone.eval()
-
-    pck_list = []
-
-    for i, data in enumerate(val_generator):
-        data["alpha"] = alpha
-
-        cur_batchsize = len(data['src_imname'])
-        pred = cur_model(data)
-
-        for k in range(cur_batchsize):
-
-            prd_kps = geometry.predict_kps(
-                data["src_kps"][k][:, :data["valid_kps_num"][k]], pred[resolution][0][k], originalShape=target_shape)
-            prd_kps = torch.from_numpy(np.array(prd_kps)).to(device)
-
-            pair_pck = evaluation.eval_pck(prd_kps, data, k)
-            pck_list.append(pair_pck)
-
-            logger.info('[%5d/%5d]: \t [Pair PCK: %3.3f]\t[Average: %3.3f] %s' %
-                        (i*batch_size + k,
-                         data['datalen'][0],
-                         pair_pck,
-                         sum(pck_list) / (i*batch_size+k+1),
-                         data['pair_class'][k]))
-    res = np.mean(np.array(pck_list))
-    logger.info("%d th epoch, PCK res on val set is %.3f" % (epoch_no, res))
-    return res
-
-
 def train(logger, opt):
     # insanity check
     if not os.path.isdir(opt.checkpoint_path):
@@ -138,11 +98,12 @@ def train(logger, opt):
 
     # model initialization
     model = Model.MMNet(opt).to(device)
-    model.train()
 
     # set loss and optimizer
     criterion = Loss.createLoss(opt)
     optim = Optimizer.createOptimizer(opt, model)
+    model.backbone.train()
+    model.train()
     max_iter = opt.epoch * len(trn_generator)
 
     step = 1
@@ -152,8 +113,6 @@ def train(logger, opt):
     # begin training, iterate over epoch nums
     for step in range(1, max_iter + 1):
         epoch = step / len(trn_generator)
-        model.train()
-        model.backbone.train()
 
         data = next(data_iter)
         cur_batchsize = len(data['src_imname'])
@@ -177,7 +136,7 @@ def train(logger, opt):
         if step % opt.step_size == 0:
             Optimizer.adjust_learning_rate(optim, opt.gamma, logger)
 
-        if step % 50 == 0:
+        if step % opt.log_interval == 0:
             logger.info("[%d, %5d] loss: %.3f" %
                         (epoch+1, cur+1, running_loss/50))
             visualizer.visualize_pred(
@@ -191,13 +150,54 @@ def train(logger, opt):
             logger.info('saving %dth ckp in %s.' % (epoch, ckp_path))
             torch.save(model.state_dict(), os.path.join(
                 ckp_path, str(epoch)+".pth"))
-            res = validation_res(model, epoch, opt, logger, target_shape)
+            # evaluate pck with specified settings
+            val_resolution = opt.val_resolution
+
+            val_dataset = Dataset.CorrespondenceDataset(
+                opt.benchmark, opt.data_path, opt.thresh_type, "val", device, opt.resize, opt.max_kps_num)
+            val_generator = torch.utils.data.DataLoader(
+                val_dataset, batch_size=opt.val_batch, shuffle=True, num_workers=0)
+
+            model.eval()
+            model.backbone.eval()
+
+            pck_list = []
+
+            for i, data in enumerate(val_generator):
+                data["alpha"] = opt.alpha
+
+                cur_batchsize = len(data['src_imname'])
+                pred = model(data)
+
+                for k in range(cur_batchsize):
+
+                    prd_kps = geometry.predict_kps(
+                        data["src_kps"][k][:, :data["valid_kps_num"][k]], pred[val_resolution][0][k], originalShape=target_shape)
+                    prd_kps = torch.from_numpy(np.array(prd_kps)).to(device)
+
+                    pair_pck = evaluation.eval_pck(prd_kps, data, k)
+                    pck_list.append(pair_pck)
+
+                    logger.info('[%5d/%5d]: \t [Pair PCK: %3.3f]\t[Average: %3.3f] %s' %
+                                (i*opt.val_batch + k+1,
+                                 data['datalen'][0],
+                                 pair_pck,
+                                 sum(pck_list) / (i*batch_size+k+1),
+                                 data['pair_class'][k]))
+            res = np.mean(np.array(pck_list))
+            logger.info("%d th epoch, PCK res on val set is %.3f" %
+                        (epoch, res))
+
+            model.train()
+            model.backbone.train()
             if res > max_pck:
                 logger.info('saving %dth ckp as best in %s.' %
                             (epoch, ckp_path))
                 torch.save(model.state_dict(), os.path.join(
                     ckp_path, "best.pth"))
                 max_pck = res
+    logger.info('Training completed. Best result on val with alpha %.2f at resolution %d is %.3f.' % (
+        opt.val_alpha, opt.val_resolution, max_pck))
 
 
 if __name__ == "__main__":

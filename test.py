@@ -50,7 +50,8 @@ def test(logger, opt):
     #ckp_fullname = "checkpoints/2021-07-09_20:23_best"
     #ckp_fullname = "ckp_mmnet_feb15_only_dataset_changed_old_model_0001/2021-07-12_10:55_best"
     #ckp_fullname = "ckp_mmnet_feb15_only_dataset_changed_old_model_0001/2021-07-12_10:55_18.pth.tar"
-    ckp_fullname = "ckp_train_feb_15_original_model_0001/2021-07-12_20:44_best"
+    #ckp_fullname = "ckp_train_feb_15_original_model_0001/2021-07-12_20:44_best"
+
     print(ckp_fullname)
     #ckp_fullname = "/home/zysong/SC_BDCN/F_r101_pascal_21/2021-03-13_11:03_best"
     #ckp_fullname = "/home/zysong/SC_BDCN/ckp_re_res101/2021-07-05_17:08_best"
