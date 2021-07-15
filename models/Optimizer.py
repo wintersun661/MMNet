@@ -11,13 +11,12 @@ def adjust_learning_rate(optimizer, gamma=0.1, logger=None):
             logger.info('%s: %s' % (param_group['name'], param_group['lr']))
 
 
-def createOptimizer(opt, net):
+def createOptimizer(opt, params_dict):
     params = []
 
     base_lr = opt.lr
     weight_decay = opt.weight_decay
 
-    params_dict = dict(net.named_parameters())
     for key, v in params_dict.items():
         if re.match(r'conv[1-5]_[1-9]*_down', key):
             if 'weight' in key:

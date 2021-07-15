@@ -14,7 +14,7 @@ from data import PascalDataset as Dataset
 #from utils import visualizer
 
 from models import Loss, Optimizer
-from models import MMNet_original as Model
+from models import Model as Model
 
 from utils import geometry, visualizer
 from evaluation_tools import evaluation
@@ -101,7 +101,7 @@ def train(logger, opt):
 
     # set loss and optimizer
     criterion = Loss.createLoss(opt)
-    optim = Optimizer.createOptimizer(opt, model)
+    optim = Optimizer.createOptimizer(opt, dict(model.named_parameters()))
     model.backbone.train()
     model.train()
     max_iter = opt.epoch * len(trn_generator)
@@ -164,7 +164,7 @@ def train(logger, opt):
             pck_list = []
 
             for i, data in enumerate(val_generator):
-                data["alpha"] = opt.alpha
+                data["alpha"] = opt.val_alpha
 
                 cur_batchsize = len(data['src_imname'])
                 pred = model(data)

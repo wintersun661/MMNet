@@ -14,7 +14,7 @@ import random
 import os
 import sys
 import math
-from models import MMNet_original as Model
+from models import Model as Model
 from utils import visualizer, geometry
 from evaluation_tools import evaluation
 from data import PascalDataset as Dataset
