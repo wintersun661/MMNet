@@ -59,6 +59,7 @@ def cross_entropy_loss2d(loss_func, inputs, kps_src_list, kps_trg_list, effect_n
 
     return loss
 
+
 def adjust_learning_rate(optimizer, gamma=0.1, logger=None):
     """Sets the learning rate to the initial LR decayed by 10 every 30 epochs"""
 
@@ -140,14 +141,14 @@ def train(logger, opt):
 
     # set loss and optimizer
     criterion = Loss.createLoss(opt)
-    optim = Optimizer.createOptimizer(opt, model)
+    optim = Optimizer.createOptimizer(opt, dict(model.named_parameters()))
 
     max_pck = 0.0
 
     # begin training, iterate over epoch nums
     for epoch in range(epoch_num):
         model.train()
-        #model.backbone.train()
+        # model.backbone.train()
         running_loss = 0.0
 
         for i, data in enumerate(trn_generator):

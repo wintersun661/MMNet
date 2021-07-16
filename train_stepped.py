@@ -93,6 +93,14 @@ def train(logger, opt):
         opt.benchmark, opt.data_path, opt.thresh_type, "trn", device, opt.resize, opt.max_kps_num)
     trn_generator = torch.utils.data.DataLoader(
         trn_dataset, batch_size=batch_size, shuffle=True, num_workers=0)
+
+    val_resolution = opt.val_resolution
+
+    val_dataset = Dataset.CorrespondenceDataset(
+        opt.benchmark, opt.data_path, opt.thresh_type, "val", device, opt.resize, opt.max_kps_num)
+    val_generator = torch.utils.data.DataLoader(
+        val_dataset, batch_size=opt.val_batch, shuffle=True, num_workers=0)
+
     trn_size = len(trn_generator)
     data_iter = iter(trn_generator)
 
@@ -115,13 +123,14 @@ def train(logger, opt):
     epoch_loss = 0
 
     step = 1
-    cur = 0
+    cur = 1
     max_pck = 0.0
     running_loss = 0.0
     # begin training, iterate over epoch nums
     for step in range(1, max_iter + 1):
         optim.zero_grad()
         epoch = step / len(trn_generator)
+        # data_iter = iter(trn_generator)
         data = next(data_iter)
         cur_batchsize = len(data['src_imname'])
         pred = model(data)
@@ -135,35 +144,32 @@ def train(logger, opt):
 
         # back propagation
         loss.backward()
+        epoch_loss += loss.cpu().data.numpy()
+
+        running_loss += loss.cpu().data.numpy()
         optim.step()
-
-        running_loss += loss.item()
-
-        cur += 1
         if step % opt.step_size == 0:
             Optimizer.adjust_learning_rate(optim, opt.gamma, logger)
 
-        if step % opt.log_interval == 0:
+        if cur % opt.log_interval == 0:
             logger.info("[%d, %5d] loss: %.3f" %
                         (epoch+1, cur+1, running_loss/50))
             visualizer.visualize_pred(
                 data, pred, suffix=str(int(epoch)), idx=str(cur), visualization_path=os.path.join(ckp_path, opt.visualization_path))
-
             running_loss = 0.0
         if cur == len(trn_generator):
             cur = 0
             # valid
-            data_iter = iter(trn_generator)
+
             logger.info('saving %dth ckp in %s.' % (epoch, ckp_path))
             torch.save(model.state_dict(), os.path.join(
                 ckp_path, str(epoch)+".pth"))
-            # evaluate pck with specified settings
-            val_resolution = opt.val_resolution
 
-            val_dataset = Dataset.CorrespondenceDataset(
-                opt.benchmark, opt.data_path, opt.thresh_type, "val", device, opt.resize, opt.max_kps_num)
-            val_generator = torch.utils.data.DataLoader(
-                val_dataset, batch_size=opt.val_batch, shuffle=True, num_workers=0)
+            epoch_loss /= len(trn_generator)
+            logger.info('Train set: Average loss : {:.4f}'.format(epoch_loss))
+
+            epoch_loss = 0
+            # evaluate pck with specified settings
 
             # model.eval()
             model.backbone.eval()
@@ -193,7 +199,7 @@ def train(logger, opt):
                         #              sum(pck_list) / (i*batch_size+k+1),
                         #              data['pair_class'][k]))
 
-            res = np.mean(np.array(pck_list))
+            res = sum(pck_list)/len(pck_list)
             logger.info("%d th epoch, PCK res on val set is %.3f" %
                         (epoch, res))
             if res > max_pck:
@@ -202,9 +208,11 @@ def train(logger, opt):
                 torch.save(model.state_dict(), os.path.join(
                     ckp_path, "best.pth"))
                 max_pck = res
-
+            data_iter = iter(trn_generator)
             model.backbone.train()
             model.train()
+
+        cur += 1
 
     logger.info('Training completed. Best result on val with alpha %.2f at resolution %d is %.3f.' % (
         opt.val_alpha, opt.val_resolution, max_pck))

@@ -14,7 +14,7 @@ import random
 import os
 import sys
 import math
-from models import MMNet_original as Model
+from models import Model as Model
 from utils import visualizer, geometry
 from evaluation_tools import evaluation
 from data import PascalDataset as Dataset
@@ -238,7 +238,7 @@ def train(model, args, logger):
             model.backbone.train()
             model.train()
 
-        data_iter = iter(trainDataloader)
+            data_iter = iter(trainDataloader)
         data = next(data_iter)
         if args.cuda:
             data = data.cuda()
@@ -326,9 +326,9 @@ def train(model, args, logger):
 
 def main():
     args = parse_args()
-    logger = Logger(file_path='./logs_adapted_original_train',
-                    time_stamp=True, suffix="train").createLogger()
 
+    logger = Logger(file_path=args.ckp_path,
+                    time_stamp=True, suffix="train").createLogger()
     logger.info('*'*80)
     logger.info('the args are the below')
     logger.info('*'*80)
