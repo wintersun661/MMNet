@@ -165,7 +165,7 @@ class NonLocalMsBlock(nn.Module):
 
 
 class MMNet(nn.Module):
-    def __init__(self, logger=None, rate=4, device='cuda:0', backbone_net_name='resnet101'):
+    def __init__(self, logger=None, rate=4, device='cuda:0', backbone_net_name='resnext101'):
         super(MMNet, self).__init__()
 
         #self.L2Norm1 = L2Norm(21, 20)

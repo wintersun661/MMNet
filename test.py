@@ -16,7 +16,7 @@ from data import PascalDataset as Dataset
 # from utils import visualizer
 
 from models import Loss, Optimizer
-from models import MMNet_original as Model
+from models import Model as Model
 
 from utils import geometry as geometry
 from evaluation_tools import evaluation

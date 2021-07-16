@@ -102,9 +102,10 @@ def train(logger, opt):
     # set loss and optimizer
     criterion = Loss.createLoss(opt)
     optim = Optimizer.createOptimizer(opt, dict(model.named_parameters()))
-    model.backbone.train()
+    # model.backbone.train()
     model.train()
     max_iter = opt.epoch * len(trn_generator)
+    epoch_loss = 0
 
     step = 1
     cur = 0
@@ -112,13 +113,12 @@ def train(logger, opt):
     running_loss = 0.0
     # begin training, iterate over epoch nums
     for step in range(1, max_iter + 1):
+        optim.zero_grad()
         epoch = step / len(trn_generator)
-
         data = next(data_iter)
         cur_batchsize = len(data['src_imname'])
         pred = model(data)
         loss = 0
-        optim.zero_grad()
 
         for k in range(len(pred)):
             loss += cross_entropy_loss2d(criterion, pred[k][0], data['src_kps'],
@@ -158,44 +158,47 @@ def train(logger, opt):
             val_generator = torch.utils.data.DataLoader(
                 val_dataset, batch_size=opt.val_batch, shuffle=True, num_workers=0)
 
-            model.eval()
+            # model.eval()
             model.backbone.eval()
 
             pck_list = []
 
             for i, data in enumerate(val_generator):
                 data["alpha"] = opt.val_alpha
+                with torch.no_grad():
+                    cur_batchsize = len(data['src_imname'])
+                    pred = model(data)
 
-                cur_batchsize = len(data['src_imname'])
-                pred = model(data)
+                    for k in range(cur_batchsize):
 
-                for k in range(cur_batchsize):
+                        prd_kps = geometry.predict_kps(
+                            data["src_kps"][k][:, :data["valid_kps_num"][k]], pred[val_resolution][0][k], originalShape=target_shape)
+                        prd_kps = torch.from_numpy(
+                            np.array(prd_kps)).to(device)
 
-                    prd_kps = geometry.predict_kps(
-                        data["src_kps"][k][:, :data["valid_kps_num"][k]], pred[val_resolution][0][k], originalShape=target_shape)
-                    prd_kps = torch.from_numpy(np.array(prd_kps)).to(device)
+                        pair_pck = evaluation.eval_pck(prd_kps, data, k)
+                        pck_list.append(pair_pck)
 
-                    pair_pck = evaluation.eval_pck(prd_kps, data, k)
-                    pck_list.append(pair_pck)
+                        # logger.info('[%5d/%5d]: \t [Pair PCK: %3.3f]\t[Average: %3.3f] %s' %
+                        #             (i*opt.val_batch + k+1,
+                        #              data['datalen'][0],
+                        #              pair_pck,
+                        #              sum(pck_list) / (i*batch_size+k+1),
+                        #              data['pair_class'][k]))
 
-                    logger.info('[%5d/%5d]: \t [Pair PCK: %3.3f]\t[Average: %3.3f] %s' %
-                                (i*opt.val_batch + k+1,
-                                 data['datalen'][0],
-                                 pair_pck,
-                                 sum(pck_list) / (i*batch_size+k+1),
-                                 data['pair_class'][k]))
             res = np.mean(np.array(pck_list))
             logger.info("%d th epoch, PCK res on val set is %.3f" %
                         (epoch, res))
-
-            model.train()
-            model.backbone.train()
             if res > max_pck:
                 logger.info('saving %dth ckp as best in %s.' %
                             (epoch, ckp_path))
                 torch.save(model.state_dict(), os.path.join(
                     ckp_path, "best.pth"))
                 max_pck = res
+
+            model.backbone.train()
+            model.train()
+
     logger.info('Training completed. Best result on val with alpha %.2f at resolution %d is %.3f.' % (
         opt.val_alpha, opt.val_resolution, max_pck))
 
