@@ -14,7 +14,7 @@ from data import PascalDataset as Dataset
 #from utils import visualizer
 
 from models import Loss, Optimizer
-from models import Model as Model
+
 
 from utils import geometry, visualizer
 from evaluation_tools import evaluation
@@ -97,6 +97,13 @@ def train(logger, opt):
     data_iter = iter(trn_generator)
 
     # model initialization
+    # parse model selection
+    if opt.model == "original":
+        from models import Model as Model
+    if opt.model == "multi-reason":
+        from models import Model_multi_reason as Model
+    if opt.model == "old":
+        from models import MMNet_original as Model
     model = Model.MMNet(opt).to(device)
 
     # set loss and optimizer

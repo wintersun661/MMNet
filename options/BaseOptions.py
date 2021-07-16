@@ -13,6 +13,9 @@ class OptionParser():
         # system description
         self.parser.add_argument('--name', type=str, default=self.name)
 
+        # model type
+        self.parser.add_argument('--model', type=str, default="original")
+
         # task specific setting
         self.parser.add_argument('--benchmark', type=str, default="pfpascal")
         self.parser.add_argument('--thresh_type', type=str, default="auto")
