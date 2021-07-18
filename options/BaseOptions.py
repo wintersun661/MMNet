@@ -21,6 +21,7 @@ class OptionParser():
         self.parser.add_argument('--thresh_type', type=str, default="auto")
         self.parser.add_argument(
             '--backbone_name', type=str, default="resnet101")
+        # resnet101 resnet50 resnext-101 fcn-resnet101
         self.parser.add_argument('--ms_rate', type=int, default=4)
         self.parser.add_argument('--feature_channel', type=int, default=21)
 

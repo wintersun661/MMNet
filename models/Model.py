@@ -367,8 +367,12 @@ class MMNet(nn.Module):
         # with shape: batchsize, 21, 7, 10
 
         # upsample features into higher resolution
-        sum4_src_upsamples = self.feat_upsample_4(sum4_src)
-        sum4_trg_upsamples = self.feat_upsample_4(sum4_trg)
+        if self.backbone_name == "fcn-resnet101":
+            sum4_src_upsamples = sum4_src
+            sum4_trg_upsamples = sum4_trg
+        else:
+            sum4_src_upsamples = self.feat_upsample_4(sum4_src)
+            sum4_trg_upsamples = self.feat_upsample_4(sum4_trg)
         # with shape: batchsize, 21, 14, 20
 
         # A->B source to target
@@ -376,16 +380,22 @@ class MMNet(nn.Module):
         corrMap4d_4_AB = torch.einsum('ijkl,ijmn->iklmn', [sum4_src, sum4_trg])
         corrMap4d_4_BA = torch.einsum('ijkl,ijmn->iklmn', [sum4_trg, sum4_src])
         # reshape
-        pred4_AB_upsampled = self.upsample(corrMap4d_4_AB)
-        pred4_BA_upsampled = self.upsample(corrMap4d_4_BA)
+        if self.backbone_name == "fcn-resnet101":
+            pred4_AB_upsampled = corrMap4d_4_AB
+            pred4_BA_upsampled = corrMap4d_4_BA
+        else:
+            pred4_AB_upsampled = self.upsample(corrMap4d_4_AB)
+            pred4_BA_upsampled = self.upsample(corrMap4d_4_BA)
 
         #with shape: batchsize, 4480, 4480
 
         # layer 3: 1/16 * 1/16 resolution
         sum3_src = calLayer3(features_src)
         sum3_trg = calLayer3(features_trg)
+
         # with shape : batchsize, 21, 14, 20
         # concat deeper features into current layer
+
         sum3_src = torch.cat((sum3_src, sum4_src_upsamples), 1)
         sum3_trg = torch.cat((sum3_trg, sum4_trg_upsamples), 1)
         # with shape : batchsize, 42, 14, 20
@@ -396,8 +406,12 @@ class MMNet(nn.Module):
         #with shape: batchsize, 21, 14, 20
 
         # upsample to higher resolution
-        sum3_src_upsamples = self.feat_upsample_3(sum3_src)
-        sum3_trg_upsamples = self.feat_upsample_3(sum3_trg)
+        if self.backbone_name == "fcn-resnet101":
+            sum3_src_upsamples = sum3_src
+            sum3_trg_upsamples = sum3_trg
+        else:
+            sum3_src_upsamples = self.feat_upsample_3(sum3_src)
+            sum3_trg_upsamples = self.feat_upsample_3(sum3_trg)
 
         # A->B source to target
         corrMap4d_3_AB = torch.einsum('ijkl,ijmn->iklmn', [sum3_src, sum3_trg])
@@ -409,8 +423,12 @@ class MMNet(nn.Module):
         corrMap4d_3_AB = corrMap4d_3_AB + pred4_AB_upsampled.detach()
         corrMap4d_3_BA = corrMap4d_3_BA + pred4_BA_upsampled.detach()
         # print(corrMap4d_3_AB.shape,corrMap4d_3_BA.shape)
-        pred3_AB_upsampled = self.upsample(corrMap4d_3_AB)
-        pred3_BA_upsampled = self.upsample(corrMap4d_3_BA)
+        if self.backbone_name == "fcn-resnet101":
+            pred3_AB_upsampled = corrMap4d_3_AB
+            pred3_BA_upsampled = corrMap4d_3_BA
+        else:
+            pred3_AB_upsampled = self.upsample(corrMap4d_3_AB)
+            pred3_BA_upsampled = self.upsample(corrMap4d_3_BA)
 
         # layer 2: 1/8 * 1/8 resolution
         sum2_src = calLayer2(features_src)
