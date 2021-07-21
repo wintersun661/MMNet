@@ -37,7 +37,7 @@ class OptionParser():
 
         # checkpoint path
         self.parser.add_argument(
-            '--checkpoint_path', type=str, default="./checkpoints_debug")
+            '--ckp_path', type=str, default="./checkpoints_debug")
 
         # visualization path
         self.parser.add_argument(

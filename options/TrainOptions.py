@@ -29,6 +29,7 @@ class OptionParser(BaseOptions.OptionParser):
 
         # display
         self.parser.add_argument('--log_interval', type=int, default=50)
+        self.parser.add_argument('--average_loss', type=int, default=50)
 
         # validation settings
         self.parser.add_argument('--val_alpha', type=float, default=0.05)

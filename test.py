@@ -37,7 +37,7 @@ def test(logger, opt):
     #     logger.error("Null checkpoint file list!")
     #     exit()
 
-    ckp_path = opt.checkpoint_path
+    ckp_path = opt.ckp_path
     ckp_name = opt.ckp_type+'.pth'
 
     if opt.ckp_type == 'latest':
@@ -123,7 +123,7 @@ if __name__ == "__main__":
     print("currently executing test.py file.")
 
     options = Options.OptionParser().parse()
-    logger = Logger.Logger(file_path=options.checkpoint_path,
+    logger = Logger.Logger(file_path=options.ckp_path,
                            time_stamp=True, suffix="test").createLogger()
     args = vars(options)
     logger.info("Options listed below:----------------")
