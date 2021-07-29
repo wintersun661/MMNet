@@ -16,7 +16,7 @@ from data import PascalDataset as Dataset
 # from utils import visualizer
 
 from models import Loss, Optimizer
-from models import Model as Model
+from models import MMNet as Model
 
 from utils import geometry as geometry
 from evaluation_tools import evaluation
@@ -53,7 +53,7 @@ def test(logger, opt):
     #ckp_fullname = "ckp_train_feb_15_original_model_0001/2021-07-12_20:44_best"
 
     print(ckp_fullname)
-    #ckp_fullname = "/home/zysong/SC_BDCN/F_r101_pascal_21/2021-03-13_11:03_best"
+    #ckp_fullname = "/home/zysong/SC_BDCN/F_r101_pascal_21/2021-03-13_11:03_17.pth.tar"
     #ckp_fullname = "/home/zysong/SC_BDCN/ckp_re_res101/2021-07-05_17:08_best"
     #ckp_fullname = "/home/zysong/SC_BDCN/ckp_nonlocal_r101_pascal/2021-03-08_18:40_best"
     #ckp_fullname = "../MMNet_Feb_15/ckp_feb15_0005/2021-07-09_19:38_18.pth.tar"

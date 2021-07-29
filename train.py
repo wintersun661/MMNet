@@ -29,7 +29,7 @@ def setup_seed(seed):
     np.random.seed(seed)
     random.seed(seed)
     torch.backends.cudnn.deterministic = True
-# 设置随机数种子
+
 
 
 def adjust_learning_rate(optimizer, gamma=0.1, logger=None):
@@ -60,8 +60,8 @@ def cross_entropy_loss2d(loss_func, inputs, kps_src_list, kps_trg_list, effect_n
     loss = 0
 
     for i in range(b):
-        kps_src = kps_src_list[i].cpu().data.numpy()
-        kps_trg = kps_trg_list[i].cpu().data.numpy()
+        kps_src = kps_src_list[i]
+        kps_trg = kps_trg_list[i]
         weights = torch.zeros(effect_num_list[i], h*w)
         targets = torch.zeros(effect_num_list[i], h*w)
 
@@ -242,6 +242,7 @@ def train(model, args, logger):
             epoch_loss = 0
             torch.save(model.state_dict(), os.path.join(
                 args.ckp_path, str(int(step/iter_per_epoch))+'.pth'))
+            model.eval()
             model.backbone.eval()
             PCK_list = []
             for idx, data in enumerate(valDataloader):
@@ -299,79 +300,6 @@ def main():
 
     logger.info(model)
     train(model, args, logger)
-
-
-def parse_args():
-    parser = argparse.ArgumentParser(
-        description='Train BDCN for different args')
-    parser.add_argument('--ckp_path', type=str,
-                        default='ckp_adapted_train_original')
-    parser.add_argument('--datapath', type=str, default='/data/Datasets_SCOT')
-    parser.add_argument('-d', '--dataset', type=str,
-                        default='pfpascal', help='The dataset to train')
-    parser.add_argument('--param-dir', type=str, default='params',
-                        help='the directory to store the params')
-    parser.add_argument('--lr', dest='base_lr', type=float, default=1e-6,
-                        help='the base learning rate of model')
-    parser.add_argument('-m', '--momentum', type=float, default=0.9,
-                        help='the momentum')
-    parser.add_argument('-c', '--cuda', action='store_true',
-                        help='whether use gpu to train network')
-    parser.add_argument('-g', '--gpu', type=str, default='0',
-                        help='the gpu id to train net')
-    parser.add_argument('--weight-decay', type=float, default=0.0002,
-                        help='the weight_decay of net')
-    parser.add_argument('-r', '--resume', type=str, default=None,
-                        help='whether resume from some, default is None')
-    parser.add_argument('-p', '--pretrain', type=str, default=None,
-                        help='init net from pretrained model default is None')
-    parser.add_argument('--max-iter', type=int, default=40000,
-                        help='max iters to train network, default is 40000')
-    parser.add_argument('--epoch', type=int, default=20,
-                        help='epochs to train network, default is 20')
-    parser.add_argument('--iter-size', type=int, default=1,
-                        help='iter size for back propagation, default 1')
-    parser.add_argument('--average-loss', type=int, default=50,
-                        help='smoothed loss, default is 50')
-    parser.add_argument('-s', '--snapshots', type=int, default=1000,
-                        help='how many iters to store the params, default is 1000')
-    parser.add_argument('--step-size', type=int, default=10000,
-                        help='the number of iters to decrease the learning rate, default is 10000')
-    parser.add_argument('--display', type=int, default=20,
-                        help='how many iters display one time, default is 20')
-    parser.add_argument('-b', '--balance', type=float, default=1.1,
-                        help='the parameter to balance the neg and pos, default is 1.1')
-    parser.add_argument('-l', '--log', type=str, default='log.txt',
-                        help='the file to store log, default is log.txt')
-    parser.add_argument('-k', type=int, default=1,
-                        help='the k-th split set of multicue')
-    parser.add_argument('--batch-size', type=int, default=5,
-                        help='batch size of one iteration, default 5')
-    parser.add_argument('--crop-size', type=int, default=None,
-                        help='the size of image to crop, default not crop')
-    parser.add_argument('--yita', type=float, default=None,
-                        help='the param to operate gt, default is data in the config file')
-    parser.add_argument('--complete-pretrain', type=str, default=None,
-                        help='finetune on the complete_pretrain, default None')
-    parser.add_argument('--side-weight', type=float, default=0.5,
-                        help='the loss weight of sideout, default 0.5')
-    parser.add_argument('--fuse-weight', type=float, default=1.1,
-                        help='the loss weight of fuse, default 1.1')
-    parser.add_argument('--gamma', type=float, default=0.1,
-                        help='the decay of learning rate, default 0.1')
-    parser.add_argument('--thres', type=str, default='auto',
-                        choices=['auto', 'img', 'bbox'])
-    parser.add_argument('--log_interval', type=float, default=50,
-                        help='the log interval,default = 10')
-    parser.add_argument('--visualizer', type=str,
-                        default='visualized_training_')
-    parser.add_argument('--width', type=int, default=320)
-    parser.add_argument('--height', type=int, default=224)
-    parser.add_argument('--resolution', type=int, default=3)
-    parser.add_argument('--alpha', type=float, default=0.1)
-    parser.add_argument('--resize', type=str, default="224,320")
-    parser.add_argument('--max_kps_num', type=int, default=50)
-    return parser.parse_args()
 
 
 if __name__ == '__main__':
