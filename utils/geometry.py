@@ -67,39 +67,42 @@ def BilinearInterpolate(kps, correlationMap, originalShape):
     if xmin+1 <= w-1:
         res2 = correlationMap[ymin, xmin+1]
     if ymin+1 <= h-1 and xmin+1 <= w-1:
-        res2 = (1-yfloat) * res2 + ( yfloat) * correlationMap[ymin+1, xmin+1]
+        res2 = (1-yfloat) * res2 + (yfloat) * correlationMap[ymin+1, xmin+1]
     
     if res2 is None:
         return res1
     else:
-        
         return (1-xfloat) * res1 + (xfloat)*res2
+
 
 def BilinearInterpolateParalleled(kps_list, correlationMap, originalShape):
     # x: width, y:height
-    cur_kps_list = kps_list.permute(0,2,1)
+    cur_kps_list = kps_list.permute(0, 2, 1)
     device = kps_list.device
-    
+
     b, h, w = correlationMap.shape[:3]
     correlationMap = correlationMap.view(b, h, w, -1)
-    
-    _,kpsNum,_ = cur_kps_list.shape
-    # 
 
-    map2D = torch.zeros(b,h, w)
-    
-    cur_kps_list = cur_kps_list * torch.Tensor([2*1.0/float(originalShape[0]),2*1.0/float(originalShape[1])]).to(device)
+    _, kpsNum, _ = cur_kps_list.shape
+    #
+
+    map2D = torch.zeros(b, h, w)
+
+    cur_kps_list = cur_kps_list * \
+        torch.Tensor([2*1.0/float(originalShape[0]), 2 *
+                      1.0/float(originalShape[1])]).to(device)
     cur_kps_list -= 1.0
     cur_kps_list = cur_kps_list.unsqueeze(0)
 
-    
     # 1,5,50,2
-    
-    res = F.grid_sample(correlationMap.permute(0,3,1,2),cur_kps_list.permute(1,0,2,3),mode='bilinear').permute(2,0,3,1).squeeze(0)
+
+    res = F.grid_sample(correlationMap.permute(0, 3, 1, 2), cur_kps_list.permute(
+        1, 0, 2, 3), mode='bilinear').permute(2, 0, 3, 1).squeeze(0)
     # 5,50,70
-    
+
     return res
-    
+
+
 def findNearestPoint(kps, featsShape, originalShape):
 
     x, y = kps.copy()
@@ -171,46 +174,50 @@ def getBlurredGT(kps, featsShape, originalShape):
                      hsfilter.unsqueeze(0).unsqueeze(0), padding=1).view(h, w)
     return map2D.view(-1)
 
+
 def getBlurredGTParalleled(kps_list, featsShape, originalShape):
-    cur_kps_list = kps_list.permute(0,2,1)
+    cur_kps_list = kps_list.permute(0, 2, 1)
     device = kps_list.device
-    h,w = featsShape
-    
-    b,kpsNum,_ = cur_kps_list.shape
-    map2D = torch.zeros(b,kpsNum, h*w).to(device)
-    
-    cur_kps_list = cur_kps_list * torch.Tensor([w/float(originalShape[0]),h/float(originalShape[1])]).to(device)
+    h, w = featsShape
 
-    
-    xfloored = torch.floor(cur_kps_list[:,:,0])
-    xceiled = torch.ceil(cur_kps_list[:,:,0])
-    xceiled = torch.where(xceiled>=w-1,xfloored,xceiled)
-    
-    yfloored = torch.floor(cur_kps_list[:,:,1])
-    yceiled = torch.ceil(cur_kps_list[:,:,1])
-    yceiled = torch.where(yceiled>=h-1,yfloored,yceiled)
+    b, kpsNum, _ = cur_kps_list.shape
+    map2D = torch.zeros(b, kpsNum, h*w).to(device)
 
-    xremained = torch.remainder(cur_kps_list[:,:,0],1)
-    yremained = torch.remainder(cur_kps_list[:,:,1],1)
-    
+    cur_kps_list = cur_kps_list * \
+        torch.Tensor([w/float(originalShape[0]), h /
+                      float(originalShape[1])]).to(device)
+
+    xfloored = torch.floor(cur_kps_list[:, :, 0])
+    xceiled = torch.ceil(cur_kps_list[:, :, 0])
+    xceiled = torch.where(xceiled >= w-1, xfloored, xceiled)
+
+    yfloored = torch.floor(cur_kps_list[:, :, 1])
+    yceiled = torch.ceil(cur_kps_list[:, :, 1])
+    yceiled = torch.where(yceiled >= h-1, yfloored, yceiled)
+
+    xremained = torch.remainder(cur_kps_list[:, :, 0], 1)
+    yremained = torch.remainder(cur_kps_list[:, :, 1], 1)
+
     distanceMat = torch.stack([torch.sqrt(xremained*xremained+yremained*yremained),
-        torch.sqrt((xceiled-cur_kps_list[:,:,0])*(xceiled-cur_kps_list[:,:,0])+yremained*yremained),
-        torch.sqrt(xremained*xremained+(yceiled-cur_kps_list[:,:,1])*(yceiled-cur_kps_list[:,:,1])),
-        torch.sqrt((xceiled-cur_kps_list[:,:,0])*(xceiled-cur_kps_list[:,:,0])+(yceiled-cur_kps_list[:,:,1])*(yceiled-cur_kps_list[:,:,1]))]).to(device).permute(1,2,0)
+                               torch.sqrt(
+                                   (xceiled-cur_kps_list[:, :, 0])*(xceiled-cur_kps_list[:, :, 0])+yremained*yremained),
+                               torch.sqrt(xremained*xremained+(yceiled -
+                                                               cur_kps_list[:, :, 1])*(yceiled-cur_kps_list[:, :, 1])),
+                               torch.sqrt((xceiled-cur_kps_list[:, :, 0])*(xceiled-cur_kps_list[:, :, 0])+(yceiled-cur_kps_list[:, :, 1])*(yceiled-cur_kps_list[:, :, 1]))]).to(device).permute(1, 2, 0)
     indexMat = torch.stack([yceiled*w+xceiled,
-        yceiled*w+xfloored,
-        yfloored*w+xceiled,
-        yfloored*w+xfloored]).to(device).to(torch.int64).permute(1,2,0)
+                            yceiled*w+xfloored,
+                            yfloored*w+xceiled,
+                            yfloored*w+xfloored]).to(device).to(torch.int64).permute(1, 2, 0)
     # 4,5,50
-    
+
     minimal = 1e-5
-    distanceMat[distanceMat<minimal] = minimal
+    distanceMat[distanceMat < minimal] = minimal
     invDMat = 1.0/distanceMat
-    
+
     #4, 5, 50
 
-    sumD = torch.sum(invDMat,dim = 0)
-    invDMat/=sumD
+    sumD = torch.sum(invDMat, dim=0)
+    invDMat /= sumD
 
     # 5, 50
     hsfilter = gaussian2d(3).to(device)
@@ -220,16 +227,15 @@ def getBlurredGTParalleled(kps_list, featsShape, originalShape):
         for j in range(kpsNum):
             map2D = torch.zeros(h*w).to(device)
             for k in range(4):
-                map2D[indexMat[i,j,k]]+=invDMat[i,j,k]
+                map2D[indexMat[i, j, k]] += invDMat[i, j, k]
             map2D = F.conv2d(map2D.view(1, 1, h, w),
-                    hsfilter.unsqueeze(0).unsqueeze(0), padding=1).view(h, w)
+                             hsfilter.unsqueeze(0).unsqueeze(0), padding=1).view(h, w)
             maps_b.append(map2D)
-            
-        maps_b=torch.stack(maps_b).to(device)
-        maps_all.append(maps_b)
-    maps_all = torch.stack(maps_all).view(b,kpsNum,-1)
 
-    
+        maps_b = torch.stack(maps_b).to(device)
+        maps_all.append(maps_b)
+    maps_all = torch.stack(maps_all).view(b, kpsNum, -1)
+
     return maps_all
 
 
@@ -265,6 +271,7 @@ def predict_kps(src_kps, confidence_ts, originalShape):
 
         pred_kps_x.append(pred_x)
         pred_kps_y.append(pred_y)
+
 
     return [pred_kps_x, pred_kps_y]
 

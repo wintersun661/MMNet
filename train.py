@@ -17,7 +17,7 @@ import math
 from models import Model as Model
 from utils import visualizer, geometry
 from evaluation_tools import evaluation
-from data import PascalDataset as Dataset
+
 from options import TrainOptions as Options
 import datetime
 import cv2
@@ -29,7 +29,6 @@ def setup_seed(seed):
     np.random.seed(seed)
     random.seed(seed)
     torch.backends.cudnn.deterministic = True
-
 
 
 def adjust_learning_rate(optimizer, gamma=0.1, logger=None):
@@ -60,8 +59,8 @@ def cross_entropy_loss2d(loss_func, inputs, kps_src_list, kps_trg_list, effect_n
     loss = 0
 
     for i in range(b):
-        kps_src = kps_src_list[i]
-        kps_trg = kps_trg_list[i]
+        kps_src = kps_src_list[i].cpu().data.numpy()
+        kps_trg = kps_trg_list[i].cpu().data.numpy()
         weights = torch.zeros(effect_num_list[i], h*w)
         targets = torch.zeros(effect_num_list[i], h*w)
 
@@ -69,6 +68,7 @@ def cross_entropy_loss2d(loss_func, inputs, kps_src_list, kps_trg_list, effect_n
 
             weights[j] = geometry.BilinearInterpolate(
                 [kps_src[0, j], kps_src[1, j]], inputs[i], originalShape)
+
             targets[j] = geometry.getBlurredGT(
                 [kps_trg[0, j], kps_trg[1, j]], featsShape, originalShape)
 
@@ -81,6 +81,12 @@ def cross_entropy_loss2d(loss_func, inputs, kps_src_list, kps_trg_list, effect_n
 def train(model, args, logger):
     datapath = args.data_path
     benchmark = args.benchmark
+
+    if benchmark == 'pfpascal':
+        from data import PascalDataset as Dataset
+    if benchmark == 'spair':
+        from data import SpairDataset as Dataset
+
     thres = args.thresh_type
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     log_interval = args.log_interval
@@ -96,6 +102,7 @@ def train(model, args, logger):
 
     trainDset = Dataset.CorrespondenceDataset(
         benchmark, datapath, thres, 'trn', device, args.resize, args.max_kps_num)
+
     trainDataloader = DataLoader(
         trainDset, batch_size=args.batch, num_workers=0, shuffle=True)
     valDset = Dataset.CorrespondenceDataset(
@@ -199,6 +206,7 @@ def train(model, args, logger):
         curBatchSize = len(data['src_img'])
 
         loss = 0
+
         for k in range(4):
 
             loss += cross_entropy_loss2d(loss_func, out[k][0], data['src_kps'],

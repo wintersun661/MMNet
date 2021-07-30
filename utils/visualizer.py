@@ -145,7 +145,7 @@ def visualize_pred(data, pred, visualization_path='./debug_visualizated', suffix
                                                 :data['valid_kps_num'][i]]
             trgKps = data[trg_prefix+'_kps'][i][:,
                                                 :data['valid_kps_num'][i]]
-            print(srcImg.shape)
+            
             prdKps = geometry.predict_kps(
                 srcKps, pred[j][shift][i], originalShape=[h, w])
             jointImg = torch.cat((srcImg, trgImg), 0)

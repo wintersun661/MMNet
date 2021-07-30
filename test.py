@@ -11,12 +11,9 @@ from utils import visualizer
 from logger import BaseLogger as Logger
 from options import TestOptions as Options
 
-# data processing
-from data import PascalDataset as Dataset
-# from utils import visualizer
 
 from models import Loss, Optimizer
-from models import MMNet as Model
+from models import Model as Model
 
 from utils import geometry as geometry
 from evaluation_tools import evaluation
@@ -72,6 +69,13 @@ def test(logger, opt):
     # set specified gpu
     os.environ['CUDA_VISIBLE_DEVICES'] = opt.gpu
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+
+    benchmark = opt.benchmark
+
+    if benchmark == 'pfpascal':
+        from data import PascalDataset as Dataset
+    if benchmark == 'spair':
+        from data import SpairDataset as Dataset
 
     # set up random seed
     fix_random_seed()
