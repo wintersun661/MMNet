@@ -39,7 +39,7 @@ If you use this code for your research, please consider citing:
 @article{zhao2021multi,
   title={Multi-scale Matching Networks for Semantic Correspondence},
   author={Zhao, Dongyang and Song, Ziyang and Ji, Zhenghao and Zhao, Gangming and Ge, Weifeng and Yu, Yizhou},
-  journal={arXiv preprint arXiv:2108.00211},
+  booktitle={Proceedings of the International Conference on Computer Vision (ICCV)},
   year={2021}
 }
 ````
