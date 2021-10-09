@@ -23,5 +23,6 @@ def correct_kps(trg_kps, prd_kps, pckthres, alpha=0.1):
     l2dist = torch.pow(torch.sum(torch.pow(trg_kps - prd_kps, 2), 0), 0.5)
     thres = pckthres.expand_as(l2dist).float()
     correct_pts = torch.le(l2dist, thres * alpha)
-
+    
+   
     return torch.sum(correct_pts)

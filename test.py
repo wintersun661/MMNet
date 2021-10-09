@@ -97,6 +97,8 @@ def test(logger, opt):
 
     # iterate over test set
     for i, data in enumerate(test_generator):
+        if i not in [122, 123, 130]:
+            continue
         data["alpha"] = alpha
 
         cur_batchsize = len(data['src_imname'])
@@ -109,7 +111,9 @@ def test(logger, opt):
                 data["src_kps"][k][:, :data["valid_kps_num"][k]], pred[opt.resolution][0][k], originalShape=target_shape)
             prd_kps = torch.from_numpy(np.array(prd_kps)).to(device)
             toc = time.time()
-
+            # visualizer.vis_corr(data['src_img'][k], data['trg_img'][k], data["src_kps"][k]
+            #                     [:, :data["valid_kps_num"][k]], data["trg_kps"][k][:, :data["valid_kps_num"][k]], prd_kps,
+            #                     'visualized_test_img', i*batch_size+k)
             pair_pck = evaluation.eval_pck(prd_kps, data, k)
             pck_list.append(pair_pck)
 
@@ -119,8 +123,9 @@ def test(logger, opt):
                          pair_pck,
                          sum(pck_list) / (i*batch_size+k+1),
                          data['pair_class'][k]))
-            # visualizer.visualize_pred(
-            #     data, pred, suffix="", idx=str(i), visualization_path=os.path.join(ckp_path, opt.visualization_path, 'test'))
+        if i in [120, 122, 123, 130, 135]:
+            visualizer.visualize_pred(
+                data, pred, suffix="", idx=str(i), visualization_path=os.path.join(ckp_path, opt.visualization_path, 'test'))
 
 
 if __name__ == "__main__":

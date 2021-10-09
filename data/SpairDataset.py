@@ -8,6 +8,7 @@ import torch
 from PIL import Image
 
 from data import BaseDataset
+from utils import visualizer
 
 
 def retrieveValidKps(anntn_pair):
@@ -74,6 +75,7 @@ class CorrespondenceDataset(BaseDataset.CorrespondenceDataset):
         sample = super(CorrespondenceDataset, self).__getitem__(idx)
 
         sample['pckthres'] = self.get_pckthres(sample).to(self.device)
+        
 
         return sample
 

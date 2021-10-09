@@ -10,6 +10,7 @@ from datetime import datetime
 from matplotlib import gridspec
 
 from utils import geometry
+from matplotlib.patches import Rectangle
 
 
 def _unnormalize(normalized_image):
@@ -36,6 +37,7 @@ def visualize_image_with_annotation(image, kps, bbox=None, visualization_path=".
     # clear canvas
     plt.cla()
 
+    ax = plt.gca()
     # output visualization materials
     if str(image.device) == "cuda:0":
         image = image.cpu().detach().numpy()
@@ -48,7 +50,13 @@ def visualize_image_with_annotation(image, kps, bbox=None, visualization_path=".
         y = float(kps[1, k])
 
         c = np.random.rand(3)
-        plt.gca().add_artist(plt.Circle((x, y), radius=5, color=c))
+        ax.add_artist(plt.Circle((x, y), radius=5, color=c))
+
+    if bbox != None:
+        from matplotlib.patches import Rectangle
+        rect = Rectangle((bbox[0], bbox[1]), bbox[2]-bbox[0], bbox[3] -
+                         bbox[1], linewidth=1, edgecolor='r', facecolor='none')
+        ax.add_patch(rect)
 
     plt.axis("off")
 
@@ -78,16 +86,26 @@ def visualize_pred(data, pred, visualization_path='./debug_visualizated', suffix
     batchsize = len(data['src_img'])
     nrow = 5
     ncol = batchsize
-    fig = plt.figure(figsize=(ncol+1, nrow+1))
+
+    ncol = 5
+    nrow = batchsize
+
+    fig = plt.figure(figsize=(ncol, nrow+1))
 
     gs = gridspec.GridSpec(nrow, ncol,
                            wspace=0.0, hspace=0.0,
                            top=1.-0.5/(nrow+1), bottom=0.5/(nrow+1),
-                           left=0.5/(ncol+1), right=1-0.5/(ncol+1)
+                           #    left=0.5/(ncol+1), right=1-0.5/(ncol+1)
                            )
 
     srcImg_List = []
     trgImg_List = []
+
+    def __plot_star(xa, ya, line_width, offset, c):
+        plt.plot([xa-offset, ya], [xa+offset, ya], c=c,
+                 linestyle='-', linewidth=line_width)
+        plt.plot([xa, ya-offset], [xa, ya+offset], c=c,
+                 linestyle='-', linewidth=line_width)
 
     for i in range(batchsize):
         # avoid unexpected influences by in-place un-normalization
@@ -115,8 +133,9 @@ def visualize_pred(data, pred, visualization_path='./debug_visualizated', suffix
 
         jointImg = torch.cat((srcImg, trgImg), 0)
 
-        plt.subplot(gs[0, i])
-
+        plt.subplot(gs[i, 0])
+        plt.cla()
+        ax = plt.gca()
         for k in range(srcKps.shape[1]):
             xa = float(srcKps[0, k])
             ya = float(srcKps[1, k])
@@ -124,10 +143,16 @@ def visualize_pred(data, pred, visualization_path='./debug_visualizated', suffix
             yb = float(trgKps[1, k])+srcImg.shape[0]
 
             c = np.random.rand(3)
-            plt.gca().add_artist(plt.Circle((xa, ya), radius=5, color=c))
-            plt.gca().add_artist(plt.Circle((xb, yb), radius=5, color=c))
+            ax.add_artist(plt.Circle((xa, ya), radius=0.5, color=c))
+            ax.add_artist(plt.Circle((xb, yb), radius=0.5, color=c))
 
-            plt.plot([xb, xa], [yb, ya], c=c, linestyle='-', linewidth=0.5)
+            # plt.plot([xb, xa], [yb, ya], c=c, linestyle='-', linewidth=0.5)
+        bbox_src = data['src_bbox'][i]
+        bbox_trg = data['trg_bbox'][i]
+        # rect = Rectangle((bbox_src[0],bbox_src[1]),bbox_src[2]-bbox_src[0],bbox_src[3]-bbox_src[1],linewidth=1,edgecolor='r',facecolor='none')
+        # ax.add_patch(rect)
+        # rect = Rectangle((bbox_trg[0],bbox_trg[1]+srcImg.shape[0]),bbox_trg[2]-bbox_trg[0],bbox_trg[3]-bbox_trg[1],linewidth=1,edgecolor='r',facecolor='none')
+        # ax.add_patch(rect)
 
         plt.imshow(jointImg.cpu().detach().numpy())
         plt.axis('off')
@@ -145,13 +170,13 @@ def visualize_pred(data, pred, visualization_path='./debug_visualizated', suffix
                                                 :data['valid_kps_num'][i]]
             trgKps = data[trg_prefix+'_kps'][i][:,
                                                 :data['valid_kps_num'][i]]
-            
+
             prdKps = geometry.predict_kps(
                 srcKps, pred[j][shift][i], originalShape=[h, w])
             jointImg = torch.cat((srcImg, trgImg), 0)
             jointImg = torch.cat((srcImg, trgImg), 0)
 
-            plt.subplot(gs[j+1, i])
+            plt.subplot(gs[i, j+1])
             plt.cla()
             for k in range(srcKps.shape[1]):
                 xa = float(srcKps[0, k])
@@ -162,14 +187,91 @@ def visualize_pred(data, pred, visualization_path='./debug_visualizated', suffix
                 yc = float(prdKps[1][k])+srcImg.shape[0]
 
                 c = np.random.rand(3)
-                plt.gca().add_artist(plt.Circle((xa, ya), radius=5, color=c))
-                plt.gca().add_artist(plt.Circle((xb, yb), radius=5, color=c))
-                plt.gca().add_artist(plt.Circle((xc, yc), radius=5, color=c))
-                plt.plot([xc, xa], [yc, ya], c=c, linestyle='-', linewidth=0.5)
+                plt.gca().add_artist(plt.Circle((xa, ya), radius=0.5, color=c))
+                plt.gca().add_artist(plt.Circle((xb, yb), radius=0.5, color=c))
+                plt.gca().add_artist(plt.Circle((xc, yc), radius=0.5, color=c))
+                # plt.plot([xc, xa], [yc, ya], c=c, linestyle='-', linewidth=0.5)
 
             plt.imshow(jointImg.cpu().detach().numpy())
             plt.axis('off')
 
     plt.savefig(os.path.join(visualization_path, save_name),
+                dpi=500, bbox_inches='tight', pad_inches=0)
+    plt.close(fig)
+
+
+def vis_corr(src_img_tensor, trg_img_tensor, src_kps, trg_kps, prd_kps, save_path, idx):
+    if not os.path.exists(save_path):
+        os.mkdir(save_path)
+    plt.cla()
+
+    meanset = [0.485, 0.456, 0.406]
+    stdset = [0.229, 0.224, 0.225]
+
+    radis_size = 2.5
+    line_width = 0.5
+    max_kps_number = 60
+    colors = ['indianred', 'orange', 'green', 'navy', 'maroon', 'darkorange', 'darkgreen', 'darkblue', 'darkred', 'olive', 'seagreen', 'midnightblue', 'firebrick', 'gold', 'darkcyan', 'darkslateblue',
+              'orangered', 'teal', 'purple', 'coral', 'lawngreen', 'skyblue', 'hotpink', 'tomato', 'mediumseagreen', 'aqua', 'magenta', 'lightcoral', 'palegreen', 'steelblue', 'deeppink', 'darksalmon', 'springgreen']
+
+    nrows = 1
+    ncols = 1
+    fig = plt.figure(figsize=(nrows+1, ncols+1))
+
+    src_img = src_img_tensor.clone()
+    for im_channel, mean, std in zip(src_img, meanset, stdset):
+        im_channel.mul_(std).add_(mean)
+    src_img = src_img.permute(1, 2, 0)
+
+    trg_img = trg_img_tensor.clone()
+    for im_channel, mean, std in zip(trg_img, meanset, stdset):
+        im_channel.mul_(std).add_(mean)
+    trg_img = trg_img.permute(1, 2, 0)
+
+    def __plot_star(xa, ya, line_width, offset, c):
+        plt.plot([xa-offset, ya], [xa+offset, ya], c=c,
+                 linestyle='-', linewidth=line_width)
+        plt.plot([xa, ya-offset], [xa, ya+offset], c=c,
+                 linestyle='-', linewidth=line_width)
+
+    def __sub_plot_corr(src_img, trg_img, src_kps, trg_kps, colors, radis_size, line_width, nrows, ncols, index, truth_kps=None):
+        # if(src_img.shape[:2] != trg_img.shape[:2]): return
+        joint_img = torch.cat((src_img, trg_img), 0)
+        kps_num = len(src_kps[0])
+
+        plt.subplot(nrows, ncols, index)
+        for k in range(kps_num):
+            xa = float(src_kps[0, k])
+            ya = float(src_kps[1, k])
+            xb = float(trg_kps[0, k])
+            yb = float(trg_kps[1, k]) + src_img.shape[0]
+
+            if not(xa > 0 and ya > 0):
+                continue
+
+            c = colors[k]
+            plt.gca().add_artist(plt.Circle((xa, ya), radius=radis_size, color=c))
+            plt.gca().add_artist(plt.Circle((xb, yb), radius=radis_size, color=c))
+
+            xt = float(truth_kps[0, k])
+            yt = float(truth_kps[1, k]) + src_img.shape[0]
+            # plt.gca().add_artist(plt.Circle((xt,yt), radius=radis_size, color=c))
+            line_len = 5.5
+            plt.plot([xt-line_len, xt+line_len], [yt, yt], c=c,
+                     linestyle='-', linewidth=radis_size/3.8)
+            plt.plot([xt, xt], [yt-line_len, yt+line_len], c=c,
+                     linestyle='-', linewidth=radis_size/3.8)
+
+            plt.plot([xb, xa], [yb, ya], c=c,
+                     linestyle='-', linewidth=line_width)
+
+        plt.imshow(joint_img.cpu().detach().numpy())
+        plt.axis('off')
+
+    __sub_plot_corr(src_img, trg_img, src_kps, prd_kps, colors,
+                    radis_size, line_width, nrows, ncols, 1, trg_kps)
+
+    plt.subplots_adjust(hspace=0.00, wspace=0.00)
+    plt.savefig(save_path+'/val'+str(idx) + '.jpg',
                 dpi=300, bbox_inches='tight', pad_inches=0)
     plt.close(fig)

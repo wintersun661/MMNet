@@ -151,17 +151,17 @@ class CorrespondenceDataset(torch.utils.data.Dataset):
             index)
 
         sample["valid_kps_num"] = len(sample["src_kps"][0])
-
+     
         # perform image normalization with imagenet mean & std
         if self.transform:
             sample = self.transform(sample)
 
         # perform resize operation when specified
         if self.resize_flag:
-            sample["src_img"], sample["src_kps"] = self.resize(
-                sample["src_img"], sample["src_kps"])
-            sample["trg_img"], sample["trg_kps"] = self.resize(
-                sample["trg_img"], sample["trg_kps"])
+            sample["src_img"], sample["src_kps"],sample['src_bbox'] = self.resize(
+                sample["src_img"], sample["src_kps"],sample['src_bbox'])
+            sample["trg_img"], sample["trg_kps"],sample['trg_bbox'] = self.resize(
+                sample["trg_img"], sample["trg_kps"],sample['trg_bbox'])
 
         sample["src_img"] = sample["src_img"].to(self.device)
         sample["trg_img"] = sample["trg_img"].to(self.device)
@@ -210,11 +210,12 @@ class CorrespondenceDataset(torch.utils.data.Dataset):
 
         return src_kps, trg_kps, src_box, trg_box
 
-    def resize(self, image, kps):
+    def resize(self, image, kps, bbox):
         r"""jointly resize image and correspond keypoints values"""
         # visualizer.visualize_image_with_annotation(
         #     image, kps, normalized=True, suffix="original")
         image = image.unsqueeze(0)
+
         orig_size = image.shape
 
         inter_ratio_h = float(self.target_height)/orig_size[2]
@@ -228,17 +229,22 @@ class CorrespondenceDataset(torch.utils.data.Dataset):
         # visualizer.visualize_image_with_annotation(
         #     image, kps, normalized=False, suffix="resized")
         # exit()
+        bbox[0] *= inter_ratio_w
+        bbox[2] *= inter_ratio_w
+        bbox[1] *= inter_ratio_h
+        bbox[3] *= inter_ratio_h
 
         padded_kps = torch.zeros(2, self.max_kps_num)
         n = kps.shape[1]
         padded_kps[:, :n] = kps
 
-        return image, padded_kps
+        return image, padded_kps,bbox
 
     def get_pckthres(self, sample):
         r"""Compute PCK threshold"""
         if self.thresh_type == 'bbox':
             trg_bbox = sample['trg_bbox']
+            
             return torch.max(trg_bbox[2]-trg_bbox[0], trg_bbox[3]-trg_bbox[1])
         elif self.thresh_type == 'img':
             return torch.tensor(max(sample['trg_img'].size(1), sample['trg_img'].size(2)))

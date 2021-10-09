@@ -303,7 +303,7 @@ def main():
     os.environ['CUDA_VISIBLE_DEVICES'] = args.gpu
     device = 'cuda:0'
 
-    setup_seed(0)
+    setup_seed(8000)
     model = Model.MMNet(args).to(device)
 
     logger.info(model)
