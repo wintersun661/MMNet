@@ -18,6 +18,8 @@ python setup.py install
 
 
 ## Reproduction
+### for training
+python train.py --seed 0 --lr 0.0005
 
 ### for test
 Trained models are available on [[google drive](https://drive.google.com/drive/folders/13rBUJLxWbwgOHihWCZvcLnyDBN_guQFq?usp=sharing)].
