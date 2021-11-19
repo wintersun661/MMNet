@@ -30,7 +30,7 @@ pascal with fcn-resnet101 backbone(PCK@0.05:81.6%):
 python test.py --alpha 0.05 --backbone fcn-resnet101 --ckp_name path\to\ckp_pascal_fcnres101.pth --resize 224,320
 ```
 
-spair with fcn-resnet101 backbone(PCK@0.05:46.6%):
+spair with fcn-resnet101 backbone(PCK@0.1):
 ```bash
 python test.py --alpha 0.05 --benchmark spair --backbone fcn-resnet101 --ckp_name path\to\ckp_spair_fcnres101.pth --resize 224,320
 ```
